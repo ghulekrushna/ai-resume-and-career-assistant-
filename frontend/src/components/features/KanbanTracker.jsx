@@ -337,6 +337,7 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
       {/* Kanban Pipeline Board */}
       <div className="kanban-board">
         {STAGES.filter((stg) => mobileColumnFilter === 'all' || stg.id === mobileColumnFilter).map((stage) => {
+          const realStageIdx = STAGES.findIndex((s) => s.id === stage.id);
           const stageJobs = filteredJobs.filter((j) => j.status === stage.id);
           const isOver = dragOverStage === stage.id;
 
@@ -345,7 +346,6 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
               key={stage.id}
               className={`kanban-column ${isOver ? 'is-drag-over' : ''}`}
               onDragOver={(e) => handleDragOver(e, stage.id)}
-
               onDrop={(e) => handleDrop(e, stage.id)}
             >
               <div className="column-header">
@@ -381,7 +381,7 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
                       <div className="move-buttons-group">
                         <button
                           className="card-action-btn"
-                          disabled={stageIdx === 0}
+                          disabled={realStageIdx === 0}
                           onClick={() => moveJobStage(job.id, -1)}
                           title="Move stage left"
                         >
@@ -389,7 +389,7 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
                         </button>
                         <button
                           className="card-action-btn"
-                          disabled={stageIdx === STAGES.length - 1}
+                          disabled={realStageIdx === STAGES.length - 1}
                           onClick={() => moveJobStage(job.id, 1)}
                           title="Move stage right"
                         >
@@ -428,6 +428,7 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
           );
         })}
       </div>
+
 
       {/* Add / Edit Job Modal */}
       {showModal && (
