@@ -153,6 +153,26 @@ class ApiService {
       body: JSON.stringify({ username, password })
     });
   }
+
+  // 7. Resume Upload & Persistence API
+  async saveResume(resumeData) {
+    const payload = {
+      title: resumeData.title || resumeData.name || 'Uploaded Resume',
+      template_id: resumeData.template_id || resumeData.id || 'tmpl-ats',
+      content_json: JSON.stringify(resumeData.initialData || resumeData),
+      ats_score: parseInt(resumeData.atsScore) || 96
+    };
+
+    return await this.request('/resumes/', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async fetchResumes() {
+    const res = await this.request('/resumes/');
+    return res || [];
+  }
 }
 
 export const apiService = new ApiService();

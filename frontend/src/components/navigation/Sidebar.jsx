@@ -34,6 +34,8 @@ const Sidebar = ({
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const isTemplateOpen = activeId === 'create-resume' || activeId === 'my-resume';
+
   // Define navigation items requested by user
   const mainNavItems = [
     {
@@ -42,12 +44,16 @@ const Sidebar = ({
       icon: HiOutlineSquares2X2,
       badge: null
     },
-    {
-      id: 'create-resume',
-      label: 'Create Resume',
-      icon: HiOutlineDocumentText,
-      badge: '3 Saved'
-    },
+    ...(!isTemplateOpen
+      ? [
+          {
+            id: 'create-resume',
+            label: 'Create Resume',
+            icon: HiOutlineDocumentText,
+            badge: '3 Saved'
+          }
+        ]
+      : []),
     {
       id: 'ai-resume',
       label: 'AI Resume',

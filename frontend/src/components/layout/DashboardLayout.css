@@ -194,6 +194,102 @@ body.light .dashboard-top-navbar {
   margin-bottom: 2rem;
 }
 
+/* Level & XP Progress Banner Styles */
+.career-level-banner-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(59, 130, 246, 0.15));
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.level-badge-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  height: 70px;
+  background: linear-gradient(135deg, #a855f7, #3b82f6);
+  border-radius: 14px;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.35);
+}
+
+.level-num {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.level-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+  opacity: 0.95;
+}
+
+.level-progress-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.level-text-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.xp-status-title {
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.xp-fraction {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.xp-progress-bar-bg {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.xp-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7, #3b82f6, #06b6d4);
+  border-radius: 6px;
+  transition: width 0.5s ease-in-out;
+}
+
+.level-up-toast-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.toast-sparkle {
+  font-size: 1.4rem;
+}
+
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border-light);

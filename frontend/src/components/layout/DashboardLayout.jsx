@@ -30,6 +30,37 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
 
+  // Automatically minimize sidebar when opening Resume Templates / Create Resume
+  React.useEffect(() => {
+    if (activeTab === 'create-resume' || activeTab === 'my-resume') {
+      setIsSidebarCollapsed(true);
+    }
+  }, [activeTab]);
+
+  const [userLevel, setUserLevel] = useState(user?.level || 1);
+  const [userXp, setUserXp] = useState(user?.xp || 150);
+  const [xpToNextLevel, setXpToNextLevel] = useState(user?.xpToNextLevel || 500);
+  const [levelUpToast, setLevelUpToast] = useState(null);
+
+  const gainXp = (amount, activityName) => {
+    setUserXp((prevXp) => {
+      const newXp = prevXp + amount;
+      if (newXp >= xpToNextLevel) {
+        setUserLevel((prevLvl) => {
+          const nextLvl = prevLvl + 1;
+          setLevelUpToast(`🎉 Level Up! You reached Level ${nextLvl}! (${activityName} +${amount} XP)`);
+          setTimeout(() => setLevelUpToast(null), 4500);
+          return nextLvl;
+        });
+        setXpToNextLevel((prevMax) => prevMax + 500);
+      } else {
+        setLevelUpToast(`⭐ +${amount} XP Gained for ${activityName}!`);
+        setTimeout(() => setLevelUpToast(null), 3000);
+      }
+      return newXp;
+    });
+  };
+
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
     document.body.classList.toggle('light', isDarkMode);
@@ -46,9 +77,38 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
                 <h2>Welcome back, {user?.name || 'User'} 👋</h2>
                 <p>Here is an overview of your resume stats and AI career progress.</p>
               </div>
-              <button className="primary-action-btn">
+              <button className="primary-action-btn" onClick={() => setActiveTab('create-resume')}>
                 <HiOutlinePlus /> Create New Resume
               </button>
+            </div>
+
+            {/* Level Up Toast Alert */}
+            {levelUpToast && (
+              <div className="level-up-toast-card fade-in">
+                <HiOutlineSparkles className="toast-sparkle" />
+                <span>{levelUpToast}</span>
+              </div>
+            )}
+
+            {/* User Career Level & XP Progress Banner */}
+            <div className="career-level-banner-card">
+              <div className="level-badge-box">
+                <span className="level-num">Lvl {userLevel}</span>
+                <span className="level-title">Career Master</span>
+              </div>
+
+              <div className="level-progress-info">
+                <div className="level-text-row">
+                  <span className="xp-status-title">🚀 Level Progress & Activity XP</span>
+                  <span className="xp-fraction"><strong>{userXp}</strong> / {xpToNextLevel} XP</span>
+                </div>
+                <div className="xp-progress-bar-bg">
+                  <div
+                    className="xp-progress-bar-fill"
+                    style={{ width: `${Math.min((userXp / xpToNextLevel) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Stat Cards Grid */}
@@ -170,21 +230,21 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
       case 'my-resume':
         return (
           <div className="tab-view fade-in">
-            <ResumeTemplates />
+            <ResumeTemplates onGainXp={gainXp} />
           </div>
         );
 
       case 'ai-resume':
-        return <AiResumeGenerator />;
+        return <AiResumeGenerator onGainXp={gainXp} />;
 
       case 'ats-checker':
-        return <AtsChecker />;
+        return <AtsChecker onGainXp={gainXp} />;
 
       case 'job-recommendation':
-        return <JobRecommendations />;
+        return <JobRecommendations onGainXp={gainXp} />;
 
       case 'interview-prep':
-        return <InterviewPrep />;
+        return <InterviewPrep onGainXp={gainXp} />;
 
       case 'profile':
         return <UserProfile user={user} />;
@@ -237,14 +297,6 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
           </div>
 
           <div className="nav-actions">
-            <button className="icon-btn" onClick={toggleTheme} title="Toggle Theme">
-              {isDarkMode ? <HiOutlineSun /> : <HiOutlineMoon />}
-            </button>
-
-            <button className="icon-btn notification-btn" title="Notifications">
-              <HiOutlineBell />
-              <span className="notif-badge" />
-            </button>
           </div>
         </header>
 

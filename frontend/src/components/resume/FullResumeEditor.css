@@ -40,6 +40,28 @@ body.dark .full-resume-editor-viewport,
   gap: 0.85rem;
 }
 
+.back-to-templates-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-to-templates-btn:hover {
+  background: #e2e8f0;
+  color: #2563eb;
+  border-color: #94a3b8;
+  transform: translateX(-2px);
+}
+
 .brand-badge {
   width: 32px;
   height: 32px;
@@ -196,22 +218,136 @@ body.dark .full-resume-editor-viewport,
   background: #fee2e2;
 }
 
+/* Radix Animated Sidebar Trigger Button */
+.sidebar-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  background: #ffffff;
+  color: #1e293b;
+  cursor: pointer;
+  font-size: 1.15rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-trigger-btn:hover {
+  background: #f1f5f9;
+  color: #2563eb;
+  border-color: #94a3b8;
+}
+
+.sidebar-trigger-btn.is-collapsed {
+  transform: rotate(180deg);
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
 /* 2. THREE-PANEL CONTAINER LAYOUT */
 .editor-panels-container {
   display: grid;
-  grid-template-columns: 320px 1fr 300px;
+  grid-template-columns: auto 1fr 300px;
   flex: 1;
   overflow: hidden;
   position: relative;
 }
 
-/* LEFT PANEL */
+/* LEFT PANEL (Radix Animated Collapsible Sidebar) */
 .editor-left-panel {
+  width: 340px;
+  min-width: 340px;
   background: #ffffff;
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  position: relative;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 5;
+}
+
+.editor-left-panel.collapsed {
+  width: 68px;
+  min-width: 68px;
+  overflow-y: visible;
+}
+
+/* Sidebar Rail Handle (Hoverable right edge handle) */
+.sidebar-rail {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.2s ease;
+  z-index: 20;
+}
+
+.sidebar-rail:hover {
+  background: rgba(37, 99, 235, 0.4);
+}
+
+/* Collapsed Icon-Only Navigation */
+.collapsed-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+  gap: 0.85rem;
+}
+
+.collapsed-nav-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsed-nav-btn:hover,
+.collapsed-nav-btn.active {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+/* Radix Sidebar Tooltip Popup */
+.collapsed-nav-btn .sidebar-tooltip-popup {
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0f172a;
+  color: #ffffff;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 100;
+}
+
+.collapsed-nav-btn:hover .sidebar-tooltip-popup {
+  opacity: 1;
+  transform: translateY(-50%) translateX(2px);
 }
 
 .panel-tab-header {
@@ -1061,5 +1197,47 @@ body.dark .full-resume-editor-viewport,
 @media (max-width: 1100px) {
   .editor-panels-container {
     grid-template-columns: 280px 1fr 240px;
+  }
+}
+
+/* Print & PDF Export Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .resume-paper,
+  .resume-paper * {
+    visibility: visible;
+  }
+  .resume-paper {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    transform: scale(1) !important;
+  }
+  .full-resume-editor-viewport,
+  .editor-top-navbar,
+  .editor-left-panel,
+  .editor-right-panel,
+  .canvas-notice,
+  .sidebar-rail,
+  .sidebar-trigger-btn {
+    display: none !important;
   }
 }

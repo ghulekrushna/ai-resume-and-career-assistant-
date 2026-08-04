@@ -17,6 +17,7 @@ import {
   HiOutlineUser
 } from 'react-icons/hi2';
 import FullResumeEditor from './FullResumeEditor';
+import { apiService } from '../../services/api';
 import './ResumeTemplates.css';
 
 // Import template asset images from assets
@@ -32,7 +33,7 @@ import resumeDataScientistImg from '../../assets/resume_data_scientist.png';
  * Renders interactive resume templates gallery, category filter, live template preview modal,
  * and quick customization tools for the 'Create Resume' sidebar view.
  */
-const ResumeTemplates = () => {
+const ResumeTemplates = ({ onGainXp }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [previewTemplate, setPreviewTemplate] = useState(null);
@@ -62,7 +63,132 @@ const ResumeTemplates = () => {
     ]
   });
 
+  const [customUploadedTemplates, setCustomUploadedTemplates] = useState([]);
+
+  const resumeFileInputRef = React.useRef(null);
+
+  const handleResumeFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const textContent = event.target.result;
+      const uploadedName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
+
+      const uploadedTemplate = {
+        id: `tmpl-uploaded-${Date.now()}`,
+        name: `Uploaded: ${uploadedName}`,
+        category: 'ats',
+        atsScore: '97%',
+        tag: 'Uploaded Resume',
+        tagClass: 'tag-ats',
+        description: `Imported from ${file.name}`,
+        image: atsFriendlyImg,
+        accentColors: ['#2563eb', '#7c3aed', '#059669', '#0f172a'],
+        initialData: {
+          profileImage: '',
+          fullName: uploadedName.toUpperCase(),
+          jobTitle: 'IMPORTED RESUME CANDIDATE',
+          email: 'candidate@example.com',
+          phone: '+1 (555) 123-4567',
+          address: 'City, State',
+          website: '',
+          summary: typeof textContent === 'string' && textContent.length > 20
+            ? textContent.slice(0, 300) + '...'
+            : 'Successfully imported content from your uploaded resume file.',
+          experiences: [
+            {
+              id: 'exp-1',
+              company: 'Previous Company',
+              title: 'Previous Role',
+              period: '2021 - Present',
+              description: typeof textContent === 'string' && textContent.length > 50
+                ? textContent.slice(0, 200)
+                : 'Key responsibilities and achievements extracted from uploaded file.'
+            }
+          ],
+          educations: [
+            {
+              id: 'edu-1',
+              institution: 'University Name',
+              degree: 'Degree / Program',
+              year: '2021'
+            }
+          ],
+          skills: ['Uploaded Skill 1', 'Uploaded Skill 2', 'Uploaded Skill 3']
+        }
+      };
+
+      // Save to Backend Database (FastAPI SQLite DB)
+      try {
+        await apiService.saveResume({
+          title: uploadedTemplate.name,
+          template_id: uploadedTemplate.id,
+          initialData: uploadedTemplate.initialData,
+          atsScore: 97
+        });
+      } catch (err) {
+        console.warn('Backend save notice:', err);
+      }
+
+      // Prepend to Create Resume gallery state
+      setCustomUploadedTemplates((prev) => [uploadedTemplate, ...prev]);
+
+      if (onGainXp) {
+        onGainXp(75, 'Resume File Upload');
+      }
+
+      // Open in Full Resume Editor
+      setFullScreenEditorTemplate(uploadedTemplate);
+    };
+
+    reader.readAsText(file);
+  };
+
+  const blankTemplate = {
+    id: 'tmpl-blank-custom',
+    name: 'Blank Custom Resume',
+    category: 'ats',
+    atsScore: '100%',
+    tag: 'Blank Slate',
+    tagClass: 'tag-ats',
+    description: 'Fresh clean slate template to build your resume completely from scratch.',
+    image: atsFriendlyImg,
+    accentColors: ['#2563eb', '#7c3aed', '#059669', '#0f172a'],
+    initialData: {
+      profileImage: '',
+      fullName: 'Your Full Name',
+      jobTitle: 'YOUR TARGET JOB TITLE',
+      email: 'email@example.com',
+      phone: '+1 (555) 000-0000',
+      address: 'City, State',
+      website: 'linkedin.com/in/yourname',
+      summary: 'Enter a brief professional summary highlighting your key background and career goals...',
+      experiences: [
+        {
+          id: 'exp-1',
+          company: 'Company Name',
+          title: 'Position / Role Title',
+          period: '2023 - Present',
+          description: 'Add your key responsibilities, projects, and achievements here.'
+        }
+      ],
+      educations: [
+        {
+          id: 'edu-1',
+          institution: 'University / Institution Name',
+          degree: 'Degree & Major',
+          year: '2023'
+        }
+      ],
+      skills: ['Skill 1', 'Skill 2', 'Skill 3', 'Skill 4']
+    }
+  };
+
   const templatesData = [
+    ...customUploadedTemplates,
+    blankTemplate,
     {
       id: 'tmpl-software-engineer',
       name: 'Senior Full Stack & AI Engineer',
@@ -571,8 +697,36 @@ const ResumeTemplates = () => {
     }
   ];
 
+  const handleSaveCustomResume = async (savedTemplate) => {
+    setCustomUploadedTemplates((prev) => {
+      const existingIdx = prev.findIndex((t) => t.id === savedTemplate.id);
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        updated[existingIdx] = savedTemplate;
+        return updated;
+      }
+      return [savedTemplate, ...prev];
+    });
+
+    try {
+      await apiService.saveResume({
+        title: savedTemplate.name,
+        template_id: savedTemplate.id,
+        initialData: savedTemplate.initialData,
+        atsScore: 98
+      });
+    } catch (err) {
+      console.warn('Backend save notice:', err);
+    }
+
+    if (onGainXp) {
+      onGainXp(100, 'Saving Custom Resume');
+    }
+  };
+
   const categories = [
-    { id: 'all', label: 'All Templates (12)' },
+    { id: 'all', label: `All Templates (${templatesData.length})` },
+    { id: 'my-resumes', label: `My Resumes & Uploads (${customUploadedTemplates.length})` },
     { id: 'modern', label: 'Tech & Product' },
     { id: 'ats', label: 'ATS Optimized (99%)' },
     { id: 'executive', label: 'Executive & Strategy' },
@@ -596,12 +750,23 @@ const ResumeTemplates = () => {
         </div>
 
         <div className="quick-options">
-          <button className="secondary-action-btn">
+          <input
+            type="file"
+            ref={resumeFileInputRef}
+            style={{ display: 'none' }}
+            accept=".pdf,.docx,.doc,.txt,.json,.html"
+            onChange={handleResumeFileUpload}
+          />
+          <button
+            className="secondary-action-btn"
+            onClick={() => resumeFileInputRef.current?.click()}
+            title="Upload existing resume file"
+          >
             <HiOutlineDocumentArrowUp /> Upload & Re-template
           </button>
           <button
             className="primary-action-btn"
-            onClick={() => setFullScreenEditorTemplate(templatesData[0])}
+            onClick={() => setFullScreenEditorTemplate(blankTemplate)}
           >
             <HiOutlinePlus /> Blank Custom Resume
           </button>
@@ -833,6 +998,7 @@ const ResumeTemplates = () => {
         <FullResumeEditor
           template={fullScreenEditorTemplate}
           onClose={() => setFullScreenEditorTemplate(null)}
+          onSave={handleSaveCustomResume}
         />
       )}
     </div>

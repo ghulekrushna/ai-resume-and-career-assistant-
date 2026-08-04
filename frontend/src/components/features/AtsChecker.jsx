@@ -12,7 +12,7 @@ import {
 } from 'react-icons/hi2';
 import './AtsChecker.css';
 
-const AtsChecker = () => {
+const AtsChecker = ({ onGainXp }) => {
   const [resumeText, setResumeText] = useState(`Alex Morgan - Senior Full Stack & AI Engineer
 Email: alex.morgan@example.com | San Francisco, CA
 
@@ -32,11 +32,39 @@ B.S. in Computer Science - University of California (2020)`);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
 
+  const fileInputRef = React.useRef(null);
+  const [uploadedFileName, setUploadedFileName] = useState('');
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadedFileName(file.name);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const textContent = event.target.result;
+      if (typeof textContent === 'string' && textContent.trim()) {
+        setResumeText(textContent);
+        if (onGainXp) onGainXp(50, 'Uploading Resume File');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const clearUploadedFile = () => {
+    setUploadedFileName('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleRunScan = async () => {
     if (!resumeText.trim() || !jobDescription.trim()) return;
     setIsScanning(true);
 
     const result = await apiService.scanAtsCompatibility(resumeText, jobDescription);
+    if (onGainXp) onGainXp(75, 'ATS Scan Analysis');
 
     setScanResult({
       overallScore: result.overallScore,
@@ -73,6 +101,39 @@ B.S. in Computer Science - University of California (2020)`);
         {/* Left Inputs Column */}
         <div className="ats-card input-section">
           <h3><HiOutlineDocumentText /> Step 1: Input Resume & Target Job</h3>
+          
+          {/* File Upload Box */}
+          <div className="ats-file-upload-box">
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              accept=".pdf,.docx,.doc,.txt,.json,.html"
+              onChange={handleFileUpload}
+            />
+            <div
+              className="upload-drop-zone"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <HiOutlineDocumentArrowUp className="upload-icon" />
+              <div className="drop-zone-text">
+                <strong>Upload Resume File (PDF, DOCX, TXT, HTML)</strong>
+                <p>Click to select or drop your resume file to scan automatically</p>
+              </div>
+              <button type="button" className="browse-file-btn">
+                Browse File
+              </button>
+            </div>
+
+            {uploadedFileName && (
+              <div className="uploaded-file-badge">
+                <span>📄 Loaded File: <strong>{uploadedFileName}</strong></span>
+                <button type="button" className="clear-file-btn" onClick={clearUploadedFile} title="Clear File">
+                  ×
+                </button>
+              </div>
+            )}
+          </div>
           
           <div className="form-group">
             <label>Resume Content (Text or Draft)</label>

@@ -12,7 +12,14 @@ import {
   HiOutlineCloudArrowUp,
   HiOutlineMagnifyingGlassPlus,
   HiOutlineMagnifyingGlassMinus,
-  HiOutlineCheckCircle
+  HiOutlineCheckCircle,
+  HiArrowLeft,
+  HiOutlineUser,
+  HiOutlineDocumentText,
+  HiOutlineBriefcase,
+  HiOutlineAcademicCap,
+  HiBars3BottomLeft,
+  HiOutlineChevronLeft
 } from 'react-icons/hi2';
 import './FullResumeEditor.css';
 
@@ -20,12 +27,47 @@ import './FullResumeEditor.css';
  * Full-Screen 3-Panel Interactive Resume Editor
  * Matches the user reference screenshot with Left Content Panel, Center Canvas, and Right Formatting Bar.
  */
-const FullResumeEditor = ({ template, onClose }) => {
+const FullResumeEditor = ({ template, onClose, onSave }) => {
   // Zoom level state
   const [zoomLevel, setZoomLevel] = useState(100);
 
+  // Radix Animated Sidebar Collapsed State & Shortcut (Ctrl+B / Cmd+B)
+  const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
+
   // Active accordion section on Left Panel
   const [expandedSection, setExpandedSection] = useState('personal');
+
+  const handleSaveDraft = () => {
+    if (onSave) {
+      onSave({
+        id: template?.id || `tmpl-saved-${Date.now()}`,
+        name: resumeData.fullName ? `${resumeData.fullName}'s Resume` : 'Saved Custom Resume',
+        category: 'my-resumes',
+        atsScore: '98%',
+        tag: 'Saved Resume',
+        tagClass: 'tag-ats',
+        description: `Last updated ${new Date().toLocaleDateString()}`,
+        initialData: resumeData
+      });
+    }
+  };
+
+  const handleBackToTemplates = () => {
+    handleSaveDraft();
+    onClose();
+  };
+
+  // Radix Sidebar keyboard shortcut listener (Ctrl+B / Cmd+B)
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setIsLeftSidebarCollapsed((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Helper to extract initial data from template prop
   const getInitialResumeData = (tmpl) => {
@@ -110,6 +152,22 @@ const FullResumeEditor = ({ template, onClose }) => {
     setStyleConfig((prev) => ({ ...prev, [key]: value }));
   };
 
+  const imageInputRef = React.useRef(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setResumeData((prev) => ({
+        ...prev,
+        profileImage: event.target.result
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Add / Remove Experience
   const addExperience = () => {
     setResumeData((prev) => ({
@@ -152,16 +210,118 @@ const FullResumeEditor = ({ template, onClose }) => {
     }));
   };
 
+  // Handle Download for ONLY the User Selected Resume
+  const handleDownload = () => {
+    const rawName = resumeData.fullName || 'Selected_Resume';
+    const formattedName = rawName.replace(/\s+/g, '_');
+    
+    // Generate clean standalone HTML document for ONLY the user selected resume
+    const selectedResumeHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${formattedName}_Resume</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: ${styleConfig.fontFamily || 'Plus Jakarta Sans, sans-serif'}; background: #ffffff; color: #0f172a; padding: 40px; }
+    .resume-container { max-width: 800px; margin: 0 auto; }
+    .header { border-left: 4px solid ${styleConfig.accentColor || '#2563eb'}; padding-left: 20px; margin-bottom: 24px; }
+    .name { font-size: 30px; font-weight: 800; color: ${styleConfig.fontColor || '#0f172a'}; }
+    .title { font-size: 15px; font-weight: 700; color: ${styleConfig.accentColor || '#2563eb'}; text-transform: uppercase; margin-top: 4px; }
+    .contact { font-size: 13.5px; color: #64748b; margin-top: 6px; }
+    .section-title { font-size: 14px; font-weight: 800; color: ${styleConfig.accentColor || '#2563eb'}; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin: 20px 0 12px; }
+    .summary { font-size: 14px; line-height: 1.6; color: #334155; }
+    .exp-item { margin-bottom: 16px; }
+    .exp-row { display: flex; justify-content: space-between; font-weight: 700; font-size: 15px; }
+    .exp-company { font-size: 13.5px; color: ${styleConfig.accentColor || '#2563eb'}; font-weight: 600; margin-bottom: 4px; }
+    .exp-desc { font-size: 13.5px; color: #334155; line-height: 1.5; }
+    .skills-flex { display: flex; flex-wrap: wrap; gap: 6px; }
+    .skill-badge { background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+  <div class="resume-container">
+    <div class="header">
+      <div class="name">${resumeData.fullName || 'User Resume'}</div>
+      <div class="title">${resumeData.jobTitle || ''}</div>
+      <div class="contact">${resumeData.email || ''} | ${resumeData.phone || ''} | ${resumeData.address || ''}</div>
+    </div>
+    
+    ${resumeData.summary ? `<div class="section-title">Professional Summary</div><div class="summary">${resumeData.summary}</div>` : ''}
+
+    ${resumeData.skills && resumeData.skills.length > 0 ? `
+      <div class="section-title">Core Technical Skills</div>
+      <div class="skills-flex">
+        ${resumeData.skills.map(s => `<span class="skill-badge">${s}</span>`).join('')}
+      </div>
+    ` : ''}
+
+    ${resumeData.experiences && resumeData.experiences.length > 0 ? `
+      <div class="section-title">Work Experience</div>
+      ${resumeData.experiences.map(exp => `
+        <div class="exp-item">
+          <div class="exp-row"><span>${exp.title || ''}</span> <span>${exp.period || ''}</span></div>
+          <div class="exp-company">${exp.company || ''}</div>
+          <div class="exp-desc">${exp.description || ''}</div>
+        </div>
+      `).join('')}
+    ` : ''}
+
+    ${resumeData.educations && resumeData.educations.length > 0 ? `
+      <div class="section-title">Education</div>
+      ${resumeData.educations.map(edu => `
+        <div class="exp-item">
+          <div class="exp-row"><span>${edu.degree || ''}</span> <span>${edu.year || ''}</span></div>
+          <div class="exp-company">${edu.institution || ''}</div>
+        </div>
+      `).join('')}
+    ` : ''}
+  </div>
+  <script>
+    window.onload = function() {
+      window.print();
+    }
+  </script>
+</body>
+</html>`;
+
+    // Trigger instant download of ONLY the user's selected resume document
+    const blob = new Blob([selectedResumeHtml], { type: 'text/html;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${formattedName}_Selected_Resume.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="full-resume-editor-viewport">
       {/* 1. TOP NAVBAR HEADER */}
       <header className="editor-top-navbar">
         <div className="navbar-left">
+          <button className="back-to-templates-btn" onClick={handleBackToTemplates} title="Back to Resume Templates">
+            <HiArrowLeft /> Back to Templates
+          </button>
+
+          {/* Radix SidebarTrigger Button */}
+          <button
+            className={`sidebar-trigger-btn ${isLeftSidebarCollapsed ? 'is-collapsed' : ''}`}
+            onClick={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
+            title="Toggle Information Sidebar (Ctrl+B)"
+          >
+            <HiBars3BottomLeft />
+          </button>
+
           <div className="brand-badge">
             <HiOutlineSparkles className="sparkle-icon" />
           </div>
           <div className="editor-breadcrumbs">
-            <span>Home</span> <HiOutlineChevronRight /> <span>Project</span> <HiOutlineChevronRight /> <span className="current-crumb">My Resume</span>
+            <span>Dashboard</span> <HiOutlineChevronRight /> <span>Resume Templates</span> <HiOutlineChevronRight /> <span className="current-crumb">{template?.name || 'My Resume'}</span>
           </div>
           <span className="saved-pill">
             <HiOutlineCheckCircle /> Saved
@@ -187,7 +347,7 @@ const FullResumeEditor = ({ template, onClose }) => {
             <HiOutlineEye />
           </button>
 
-          <button className="action-btn download-btn">
+          <button className="action-btn download-btn" onClick={handleDownload} title="Download Resume PDF">
             <HiOutlineArrowDownTray /> Download
           </button>
 
@@ -204,260 +364,348 @@ const FullResumeEditor = ({ template, onClose }) => {
       {/* 2. THREE-PANEL CONTAINER */}
       <div className="editor-panels-container">
         
-        {/* LEFT PANEL: CONTENT BUILDER */}
-        <aside className="editor-left-panel">
-          <div className="panel-tab-header">
-            <button className="panel-tab active">Create</button>
-            <button className="panel-tab">Templates</button>
-          </div>
+        {/* LEFT PANEL: CONTENT BUILDER (Radix Animated Collapsible Sidebar) */}
+        <aside className={`editor-left-panel ${isLeftSidebarCollapsed ? 'collapsed' : ''}`}>
+          {/* Radix Sidebar Rail Handle */}
+          <div
+            className="sidebar-rail"
+            onClick={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
+            title="Toggle Sidebar Rail Handle"
+          />
 
-          <div className="accordion-wrapper">
-            
-            {/* Personal Information Accordion */}
-            <div className="accordion-item">
+          {isLeftSidebarCollapsed ? (
+            /* Icon-Only Collapsed Sidebar Navigation */
+            <div className="collapsed-sidebar-nav">
               <button
-                className="accordion-header"
-                onClick={() => setExpandedSection(expandedSection === 'personal' ? '' : 'personal')}
+                className={`collapsed-nav-btn ${expandedSection === 'personal' ? 'active' : ''}`}
+                onClick={() => {
+                  setExpandedSection('personal');
+                  setIsLeftSidebarCollapsed(false);
+                }}
+                title="Personal Information"
               >
-                <span>Personal Information</span>
-                {expandedSection === 'personal' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
+                <HiOutlineUser />
+                <span className="sidebar-tooltip-popup">Personal Information</span>
               </button>
 
-              {expandedSection === 'personal' && (
-                <div className="accordion-content">
-                  <div className="image-upload-box">
-                    <label>Profile Image (Optional)</label>
-                    <div className="upload-row">
-                      <img src={resumeData.profileImage} alt="Profile" className="user-thumb" />
-                      <button className="upload-btn">
-                        <HiOutlineCloudArrowUp /> Upload
+              <button
+                className={`collapsed-nav-btn ${expandedSection === 'summary' ? 'active' : ''}`}
+                onClick={() => {
+                  setExpandedSection('summary');
+                  setIsLeftSidebarCollapsed(false);
+                }}
+                title="Professional Summary"
+              >
+                <HiOutlineDocumentText />
+                <span className="sidebar-tooltip-popup">Professional Summary</span>
+              </button>
+
+              <button
+                className={`collapsed-nav-btn ${expandedSection === 'employment' ? 'active' : ''}`}
+                onClick={() => {
+                  setExpandedSection('employment');
+                  setIsLeftSidebarCollapsed(false);
+                }}
+                title="Employment History"
+              >
+                <HiOutlineBriefcase />
+                <span className="sidebar-tooltip-popup">Employment History</span>
+              </button>
+
+              <button
+                className={`collapsed-nav-btn ${expandedSection === 'education' ? 'active' : ''}`}
+                onClick={() => {
+                  setExpandedSection('education');
+                  setIsLeftSidebarCollapsed(false);
+                }}
+                title="Education"
+              >
+                <HiOutlineAcademicCap />
+                <span className="sidebar-tooltip-popup">Education</span>
+              </button>
+
+              <button
+                className={`collapsed-nav-btn ${expandedSection === 'skills' ? 'active' : ''}`}
+                onClick={() => {
+                  setExpandedSection('skills');
+                  setIsLeftSidebarCollapsed(false);
+                }}
+                title="Skills"
+              >
+                <HiOutlineSparkles />
+                <span className="sidebar-tooltip-popup">Skills</span>
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="panel-tab-header">
+                <button className="panel-tab active">Create</button>
+                <button className="panel-tab">Templates</button>
+              </div>
+
+              <div className="accordion-wrapper">
+                {/* Personal Information Accordion */}
+                <div className="accordion-item">
+                  <button
+                    className="accordion-header"
+                    onClick={() => setExpandedSection(expandedSection === 'personal' ? '' : 'personal')}
+                  >
+                    <span>Personal Information</span>
+                    {expandedSection === 'personal' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
+                  </button>
+
+                  {expandedSection === 'personal' && (
+                    <div className="accordion-content">
+                      <div className="image-upload-box">
+                        <label>Profile Image (Optional)</label>
+                        <div className="upload-row">
+                          <img
+                            src={resumeData.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256'}
+                            alt="Profile"
+                            className="user-thumb"
+                          />
+                          <input
+                            type="file"
+                            ref={imageInputRef}
+                            style={{ display: 'none' }}
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                          />
+                          <button
+                            type="button"
+                            className="upload-btn"
+                            onClick={() => imageInputRef.current?.click()}
+                            title="Upload profile photo"
+                          >
+                            <HiOutlineCloudArrowUp /> Upload Image
+                          </button>
+                        </div>
+                        <span className="helper-text">Upload a professional photo (recommended: 400x400px)</span>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Full Name</label>
+                        <input
+                          type="text"
+                          value={resumeData.fullName}
+                          onChange={(e) => setResumeData({ ...resumeData, fullName: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Job Title</label>
+                        <input
+                          type="text"
+                          value={resumeData.jobTitle}
+                          onChange={(e) => setResumeData({ ...resumeData, jobTitle: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Email</label>
+                        <input
+                          type="email"
+                          value={resumeData.email}
+                          onChange={(e) => setResumeData({ ...resumeData, email: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Phone</label>
+                        <input
+                          type="text"
+                          value={resumeData.phone}
+                          onChange={(e) => setResumeData({ ...resumeData, phone: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Address</label>
+                        <input
+                          type="text"
+                          value={resumeData.address}
+                          onChange={(e) => setResumeData({ ...resumeData, address: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Professional Summary Accordion */}
+                <div className="accordion-item">
+                  <button
+                    className="accordion-header"
+                    onClick={() => setExpandedSection(expandedSection === 'summary' ? '' : 'summary')}
+                  >
+                    <span>Professional Summary</span>
+                    {expandedSection === 'summary' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
+                  </button>
+
+                  {expandedSection === 'summary' && (
+                    <div className="accordion-content">
+                      <div className="form-group">
+                        <textarea
+                          rows={5}
+                          value={resumeData.summary}
+                          onChange={(e) => setResumeData({ ...resumeData, summary: e.target.value })}
+                        />
+                      </div>
+                      <button className="ai-polish-btn">
+                        <HiOutlineSparkles /> Polish Summary with AI
                       </button>
                     </div>
-                    <span className="helper-text">Upload a professional photo (recommended: 400x400px)</span>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Full Name</label>
-                    <input
-                      type="text"
-                      value={resumeData.fullName}
-                      onChange={(e) => setResumeData({ ...resumeData, fullName: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Job Title</label>
-                    <input
-                      type="text"
-                      value={resumeData.jobTitle}
-                      onChange={(e) => setResumeData({ ...resumeData, jobTitle: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Email</label>
-                    <input
-                      type="email"
-                      value={resumeData.email}
-                      onChange={(e) => setResumeData({ ...resumeData, email: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Phone</label>
-                    <input
-                      type="text"
-                      value={resumeData.phone}
-                      onChange={(e) => setResumeData({ ...resumeData, phone: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Address</label>
-                    <input
-                      type="text"
-                      value={resumeData.address}
-                      onChange={(e) => setResumeData({ ...resumeData, address: e.target.value })}
-                    />
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Professional Summary Accordion */}
-            <div className="accordion-item">
-              <button
-                className="accordion-header"
-                onClick={() => setExpandedSection(expandedSection === 'summary' ? '' : 'summary')}
-              >
-                <span>Professional Summary</span>
-                {expandedSection === 'summary' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
-              </button>
-
-              {expandedSection === 'summary' && (
-                <div className="accordion-content">
-                  <div className="form-group">
-                    <textarea
-                      rows={5}
-                      value={resumeData.summary}
-                      onChange={(e) => setResumeData({ ...resumeData, summary: e.target.value })}
-                    />
-                  </div>
-                  <button className="ai-polish-btn">
-                    <HiOutlineSparkles /> Polish Summary with AI
+                {/* Employment History Accordion */}
+                <div className="accordion-item">
+                  <button
+                    className="accordion-header"
+                    onClick={() => setExpandedSection(expandedSection === 'employment' ? '' : 'employment')}
+                  >
+                    <span>Employment History</span>
+                    {expandedSection === 'employment' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
                   </button>
+
+                  {expandedSection === 'employment' && (
+                    <div className="accordion-content">
+                      {resumeData.experiences.map((exp, idx) => (
+                        <div key={exp.id} className="item-card">
+                          <div className="card-top">
+                            <strong>Job #{idx + 1}</strong>
+                            <button className="delete-item-btn" onClick={() => removeExperience(exp.id)}>
+                              <HiOutlineTrash />
+                            </button>
+                          </div>
+
+                          <div className="form-group">
+                            <label>Company</label>
+                            <input
+                              type="text"
+                              value={exp.company}
+                              onChange={(e) => {
+                                const updated = [...resumeData.experiences];
+                                updated[idx].company = e.target.value;
+                                setResumeData({ ...resumeData, experiences: updated });
+                              }}
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label>Role</label>
+                            <input
+                              type="text"
+                              value={exp.title}
+                              onChange={(e) => {
+                                const updated = [...resumeData.experiences];
+                                updated[idx].title = e.target.value;
+                                setResumeData({ ...resumeData, experiences: updated });
+                              }}
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label>Description</label>
+                            <textarea
+                              rows={3}
+                              value={exp.description}
+                              onChange={(e) => {
+                                const updated = [...resumeData.experiences];
+                                updated[idx].description = e.target.value;
+                                setResumeData({ ...resumeData, experiences: updated });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+
+                      <button className="add-new-btn" onClick={addExperience}>
+                        <HiOutlinePlus /> Add Employment
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Employment History Accordion */}
-            <div className="accordion-item">
-              <button
-                className="accordion-header"
-                onClick={() => setExpandedSection(expandedSection === 'employment' ? '' : 'employment')}
-              >
-                <span>Employment History</span>
-                {expandedSection === 'employment' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
-              </button>
+                {/* Education Accordion */}
+                <div className="accordion-item">
+                  <button
+                    className="accordion-header"
+                    onClick={() => setExpandedSection(expandedSection === 'education' ? '' : 'education')}
+                  >
+                    <span>Education</span>
+                    {expandedSection === 'education' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
+                  </button>
 
-              {expandedSection === 'employment' && (
-                <div className="accordion-content">
-                  {resumeData.experiences.map((exp, idx) => (
-                    <div key={exp.id} className="item-card">
-                      <div className="card-top">
-                        <strong>Job #{idx + 1}</strong>
-                        <button className="delete-item-btn" onClick={() => removeExperience(exp.id)}>
-                          <HiOutlineTrash />
-                        </button>
+                  {expandedSection === 'education' && (
+                    <div className="accordion-content">
+                      {resumeData.educations.map((edu, idx) => (
+                        <div key={edu.id} className="item-card">
+                          <div className="form-group">
+                            <label>Degree</label>
+                            <input
+                              type="text"
+                              value={edu.degree}
+                              onChange={(e) => {
+                                const updated = [...resumeData.educations];
+                                updated[idx].degree = e.target.value;
+                                setResumeData({ ...resumeData, educations: updated });
+                              }}
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label>Institution</label>
+                            <input
+                              type="text"
+                              value={edu.institution}
+                              onChange={(e) => {
+                                const updated = [...resumeData.educations];
+                                updated[idx].institution = e.target.value;
+                                setResumeData({ ...resumeData, educations: updated });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Skills Accordion */}
+                <div className="accordion-item">
+                  <button
+                    className="accordion-header"
+                    onClick={() => setExpandedSection(expandedSection === 'skills' ? '' : 'skills')}
+                  >
+                    <span>Skills</span>
+                    {expandedSection === 'skills' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
+                  </button>
+
+                  {expandedSection === 'skills' && (
+                    <div className="accordion-content">
+                      <div className="skills-chip-container">
+                        {resumeData.skills.map((skill, index) => (
+                          <span key={index} className="editor-skill-chip">
+                            {skill}
+                            <button onClick={() => removeSkill(index)}>×</button>
+                          </span>
+                        ))}
                       </div>
 
                       <div className="form-group">
-                        <label>Company</label>
                         <input
                           type="text"
-                          value={exp.company}
-                          onChange={(e) => {
-                            const updated = [...resumeData.experiences];
-                            updated[idx].company = e.target.value;
-                            setResumeData({ ...resumeData, experiences: updated });
-                          }}
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label>Role</label>
-                        <input
-                          type="text"
-                          value={exp.title}
-                          onChange={(e) => {
-                            const updated = [...resumeData.experiences];
-                            updated[idx].title = e.target.value;
-                            setResumeData({ ...resumeData, experiences: updated });
-                          }}
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label>Description</label>
-                        <textarea
-                          rows={3}
-                          value={exp.description}
-                          onChange={(e) => {
-                            const updated = [...resumeData.experiences];
-                            updated[idx].description = e.target.value;
-                            setResumeData({ ...resumeData, experiences: updated });
-                          }}
+                          placeholder="Type a skill & hit Enter..."
+                          value={newSkill}
+                          onChange={(e) => setNewSkill(e.target.value)}
+                          onKeyDown={handleAddSkill}
                         />
                       </div>
                     </div>
-                  ))}
-
-                  <button className="add-new-btn" onClick={addExperience}>
-                    <HiOutlinePlus /> Add Employment
-                  </button>
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* Education Accordion */}
-            <div className="accordion-item">
-              <button
-                className="accordion-header"
-                onClick={() => setExpandedSection(expandedSection === 'education' ? '' : 'education')}
-              >
-                <span>Education</span>
-                {expandedSection === 'education' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
-              </button>
-
-              {expandedSection === 'education' && (
-                <div className="accordion-content">
-                  {resumeData.educations.map((edu, idx) => (
-                    <div key={edu.id} className="item-card">
-                      <div className="form-group">
-                        <label>Degree</label>
-                        <input
-                          type="text"
-                          value={edu.degree}
-                          onChange={(e) => {
-                            const updated = [...resumeData.educations];
-                            updated[idx].degree = e.target.value;
-                            setResumeData({ ...resumeData, educations: updated });
-                          }}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Institution</label>
-                        <input
-                          type="text"
-                          value={edu.institution}
-                          onChange={(e) => {
-                            const updated = [...resumeData.educations];
-                            updated[idx].institution = e.target.value;
-                            setResumeData({ ...resumeData, educations: updated });
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Skills Accordion */}
-            <div className="accordion-item">
-              <button
-                className="accordion-header"
-                onClick={() => setExpandedSection(expandedSection === 'skills' ? '' : 'skills')}
-              >
-                <span>Skills</span>
-                {expandedSection === 'skills' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
-              </button>
-
-              {expandedSection === 'skills' && (
-                <div className="accordion-content">
-                  <div className="skills-chip-container">
-                    {resumeData.skills.map((skill, index) => (
-                      <span key={index} className="editor-skill-chip">
-                        {skill}
-                        <button onClick={() => removeSkill(index)}>×</button>
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="form-group">
-                    <input
-                      type="text"
-                      placeholder="Type a skill & hit Enter..."
-                      value={newSkill}
-                      onChange={(e) => setNewSkill(e.target.value)}
-                      onKeyDown={handleAddSkill}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-          </div>
+              </div>
+            </>
+          )}
         </aside>
 
         {/* CENTER CANVAS: LIVE RESUME PAPER */}
