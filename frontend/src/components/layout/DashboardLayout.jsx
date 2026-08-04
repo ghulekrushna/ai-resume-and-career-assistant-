@@ -27,21 +27,49 @@ import {
 import './DashboardLayout.css';
 
 const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLanding }) => {
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const saved = localStorage.getItem('resuai_active_tab');
+      return saved || initialTab;
+    } catch (e) {
+      return initialTab;
+    }
+  });
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Automatically minimize sidebar when opening Resume Templates / Create Resume
+  // Automatically minimize sidebar when opening Resume Templates / Create Resume & save active tab
   React.useEffect(() => {
+    try {
+      localStorage.setItem('resuai_active_tab', activeTab);
+    } catch (e) {}
+
     if (activeTab === 'create-resume' || activeTab === 'my-resume') {
       setIsSidebarCollapsed(true);
     }
   }, [activeTab]);
 
-  const [userLevel, setUserLevel] = useState(user?.level || 1);
-  const [userXp, setUserXp] = useState(user?.xp || 150);
-  const [xpToNextLevel, setXpToNextLevel] = useState(user?.xpToNextLevel || 500);
+  const savedXpObj = React.useMemo(() => {
+    try {
+      const saved = localStorage.getItem('resuai_user_xp_data');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  }, []);
+
+  const [userLevel, setUserLevel] = useState(savedXpObj?.userLevel || user?.level || 1);
+  const [userXp, setUserXp] = useState(savedXpObj?.userXp || user?.xp || 150);
+  const [xpToNextLevel, setXpToNextLevel] = useState(savedXpObj?.xpToNextLevel || user?.xpToNextLevel || 500);
   const [levelUpToast, setLevelUpToast] = useState(null);
+
+  // Save XP stats changes to storage
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('resuai_user_xp_data', JSON.stringify({ userLevel, userXp, xpToNextLevel }));
+    } catch (e) {}
+  }, [userLevel, userXp, xpToNextLevel]);
 
   const gainXp = (amount, activityName) => {
     setUserXp((prevXp) => {

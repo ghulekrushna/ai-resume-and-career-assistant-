@@ -71,8 +71,15 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Helper to extract initial data from template prop
+  // Helper to extract initial data from template prop or localStorage
   const getInitialResumeData = (tmpl) => {
+    try {
+      const savedData = localStorage.getItem('resuai_saved_resume_data');
+      if (savedData && !tmpl?.overrideDraft) {
+        return JSON.parse(savedData);
+      }
+    } catch (e) {}
+
     if (tmpl?.initialData) {
       return {
         sectionOrder: ['summary', 'employment', 'education', 'skills'],
@@ -108,19 +115,19 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
       educations: tmpl?.educations || [
         {
           id: 'edu-1',
-          institution: 'Stanford University',
-          degree: 'BACHELOR OF SCIENCE IN COMPUTER SCIENCE',
-          year: '2020'
+          institution: 'STANFORD UNIVERSITY',
+          degree: 'B.S. in Computer Science',
+          year: '2016 - 2020'
         }
       ],
-      skills: tmpl?.skills || ['React.js', 'Node.js', 'Python', 'TypeScript', 'PostgreSQL', 'Docker', 'AWS Cloud']
+      skills: tmpl?.skills || ['React.js', 'Node.js', 'TypeScript', 'FastAPI', 'AWS Cloud', 'Docker', 'System Architecture']
     };
   };
 
   // Resume Content State
   const [resumeData, setResumeData] = useState(() => getInitialResumeData(template));
 
-  // Sync state when template prop changes
+  // Reset or update resume data when a new template is selected
   React.useEffect(() => {
     if (template) {
       setResumeData(getInitialResumeData(template));
@@ -129,6 +136,15 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
       }
     }
   }, [template]);
+
+  // Auto-save resumeData state to localStorage on every change
+  React.useEffect(() => {
+    if (resumeData) {
+      try {
+        localStorage.setItem('resuai_saved_resume_data', JSON.stringify(resumeData));
+      } catch (e) {}
+    }
+  }, [resumeData]);
 
   // Selected element & right panel styling state
   const [selectedElement, setSelectedElement] = useState('jobTitle');
