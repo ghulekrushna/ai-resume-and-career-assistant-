@@ -5,13 +5,16 @@ import { apiService } from './services/api';
 
 /**
  * Main Application Component
- * Manages user authentication state, dynamic profile data, session persistence,
- * browser history back-button protection, and secure login/logout flow.
+ * Manages user authentication state using session-bound storage (sessionStorage).
+ * When a user closes ("cuts") the browser tab or window, the session is cleared automatically.
+ * Re-visiting the website requires the user to log in again.
  */
 function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const saved = localStorage.getItem('resuai_active_user');
+      // Clear legacy persistent user state so tab close requires login
+      localStorage.removeItem('resuai_active_user');
+      const saved = sessionStorage.getItem('resuai_active_user');
       return saved ? JSON.parse(saved) : null;
     } catch (e) {
       return null;
@@ -20,17 +23,17 @@ function App() {
 
   const [viewMode, setViewMode] = useState(() => {
     try {
-      const saved = localStorage.getItem('resuai_active_user');
+      const saved = sessionStorage.getItem('resuai_active_user');
       return saved ? 'dashboard' : 'landing';
     } catch (e) {
       return 'landing';
     }
   });
 
-  // Protect against browser back/forward navigation into authenticated dashboard after logout
+  // Protect against browser back/forward navigation or session expiration
   useEffect(() => {
     const handlePopState = (e) => {
-      const savedUser = localStorage.getItem('resuai_active_user');
+      const savedUser = sessionStorage.getItem('resuai_active_user');
       if (!savedUser) {
         setCurrentUser(null);
         setViewMode('landing');
@@ -39,7 +42,7 @@ function App() {
       } else {
         // Default to landing page requiring authentication if navigated back
         setCurrentUser(null);
-        localStorage.removeItem('resuai_active_user');
+        sessionStorage.removeItem('resuai_active_user');
         localStorage.removeItem('token');
         setViewMode('landing');
       }
@@ -66,10 +69,11 @@ function App() {
     };
 
     try {
-      localStorage.setItem('resuai_active_user', JSON.stringify(formattedUser));
-      sessionStorage.setItem('resuai_auth_session', 'true');
+      // Store session in sessionStorage so closing tab/window expires active login
+      sessionStorage.setItem('resuai_active_user', JSON.stringify(formattedUser));
+      localStorage.removeItem('resuai_active_user');
     } catch (e) {
-      console.error('Failed to persist active user', e);
+      console.error('Failed to persist active session user', e);
     }
 
     // Push dashboard history state
@@ -87,10 +91,11 @@ function App() {
       console.error('Logout error', e);
     }
 
+    sessionStorage.removeItem('resuai_active_user');
+    sessionStorage.clear();
     localStorage.removeItem('resuai_active_user');
     localStorage.removeItem('token');
     localStorage.removeItem('resuai_active_tab');
-    sessionStorage.clear();
 
     // Replace browser history state so clicking Back does not re-open dashboard
     window.history.replaceState({ view: 'landing' }, '', '/');
@@ -101,9 +106,10 @@ function App() {
 
   // Handle explicit navigation back to landing page (requires login again)
   const handleBackToLanding = () => {
+    sessionStorage.removeItem('resuai_active_user');
+    sessionStorage.clear();
     localStorage.removeItem('resuai_active_user');
     localStorage.removeItem('token');
-    sessionStorage.clear();
 
     window.history.replaceState({ view: 'landing' }, '', '/');
 
@@ -130,4 +136,5 @@ function App() {
 }
 
 export default App;
+
 
