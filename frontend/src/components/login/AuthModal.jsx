@@ -178,8 +178,8 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         }
 
         let loggedInUser = null;
-        let backendAuthFailed = false;
 
+        // 1. Try FastAPI Backend Login first
         try {
           const res = await apiService.loginUser(username, password);
           if (res && res.user) {
@@ -192,10 +192,10 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
             };
           }
         } catch (apiErr) {
-          backendAuthFailed = true;
+          // Backend server offline or error returned
         }
 
-        // 1. Backend Login Successful
+        // Backend Login Successful
         if (loggedInUser) {
           setSuccessMessage('Login successful! Redirecting...');
           setTimeout(() => {
@@ -206,32 +206,17 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
           return;
         }
 
-        // 2. Backend specifically returned auth error (401 Incorrect username or password)
-        if (backendAuthFailed) {
-          setIsLoading(false);
-          setErrorMessage('Incorrect username or password. Access denied.');
-          setInfoMessage('Account not authenticated. Redirecting to Sign Up to create your account...');
-          setTimeout(() => {
-            setIsRegister(true);
-            setEmail(username.includes('@') ? username : '');
-            setName(username);
-            setErrorMessage('');
-            setInfoMessage('Please complete Sign Up to create your account and log in.');
-          }, 1800);
-          return;
-        }
-
-        // 3. Fallback: Check against local registered users database
+        // 2. Fallback: Check against registered users database (default & newly registered accounts)
         const localUsers = getRegisteredUsers();
-        const matchedUser = localUsers.find(u => 
-          u.username.toLowerCase() === username.toLowerCase() || 
+        const matchedUser = localUsers.find((u) =>
+          u.username.toLowerCase() === username.toLowerCase() ||
           u.email.toLowerCase() === username.toLowerCase()
         );
 
         if (matchedUser) {
           if (matchedUser.password === password) {
-            // Password MATCHES! Allow Login
-            setSuccessMessage('Login successful!');
+            // Correct Password! LOGIN SUCCESSFUL!
+            setSuccessMessage(`Login successful! Welcome back, ${matchedUser.name}!`);
             setTimeout(() => {
               setIsLoading(false);
               onLoginSuccess({
@@ -242,25 +227,27 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
               });
               onClose();
             }, 800);
+            return;
           } else {
-            // Wrong Password! DO NOT LOGIN!
+            // Incorrect Password! DENY LOGIN!
             setIsLoading(false);
-            setErrorMessage('Incorrect password! Please enter the correct password.');
-            setInfoMessage('Incorrect password entered. If you need a new account, click Sign Up below.');
+            setErrorMessage('Incorrect password! Access denied.');
+            setInfoMessage('Incorrect password entered. Please enter the correct password to log in.');
+            return;
           }
-        } else {
-          // Account NOT Found! DO NOT LOGIN!
-          setIsLoading(false);
-          setErrorMessage(`No account found for "${username}". Access denied.`);
-          setInfoMessage('Redirecting to Sign Up page to create an account...');
-          setTimeout(() => {
-            setIsRegister(true);
-            setEmail(username.includes('@') ? username : '');
-            setName(username);
-            setErrorMessage('');
-            setInfoMessage('Fill in your details below to create your account.');
-          }, 1800);
         }
+
+        // 3. Account NOT Found in backend or local DB -> Redirect to Sign Up
+        setIsLoading(false);
+        setErrorMessage(`No account found for "${username}". Access denied.`);
+        setInfoMessage('Redirecting to Sign Up page to create an account...');
+        setTimeout(() => {
+          setIsRegister(true);
+          setEmail(username.includes('@') ? username : '');
+          setName(username);
+          setErrorMessage('');
+          setInfoMessage('Please complete Sign Up to create your account and log in.');
+        }, 1800);
       }
     } catch (err) {
       setIsLoading(false);
