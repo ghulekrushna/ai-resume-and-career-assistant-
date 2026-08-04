@@ -12,7 +12,8 @@ import {
   HiChevronRight,
   HiOutlineArrowLeftOnRectangle,
   HiBars3,
-  HiXMark
+  HiXMark,
+  HiOutlineViewColumns
 } from 'react-icons/hi2';
 import './Sidebar.css';
 
@@ -54,6 +55,13 @@ const Sidebar = ({
           }
         ]
       : []),
+    {
+      id: 'job-tracker',
+      label: 'Kanban Tracker',
+      icon: HiOutlineViewColumns,
+      badge: '5 Active',
+      badgeClass: 'badge-ai'
+    },
     {
       id: 'ai-resume',
       label: 'AI Resume',

@@ -6,6 +6,7 @@ import AtsChecker from '../features/AtsChecker';
 import JobRecommendations from '../features/JobRecommendations';
 import InterviewPrep from '../features/InterviewPrep';
 import UserProfile from '../features/UserProfile';
+import KanbanTracker from '../features/KanbanTracker';
 import {
   HiOutlineSquares2X2,
   HiOutlineDocumentText,
@@ -245,6 +246,14 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
 
       case 'interview-prep':
         return <InterviewPrep onGainXp={gainXp} />;
+
+      case 'job-tracker':
+        return (
+          <KanbanTracker
+            gainXp={gainXp}
+            onNavigateToAts={() => setActiveTab('ats-checker')}
+          />
+        );
 
       case 'profile':
         return <UserProfile user={user} />;
