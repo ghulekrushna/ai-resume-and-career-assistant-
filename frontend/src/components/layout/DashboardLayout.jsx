@@ -374,13 +374,7 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
           <HiOutlineDocumentText />
           <span>Create Resume</span>
         </button>
-        <button
-          className={`mobile-nav-btn ${activeTab === 'job-tracker' ? 'active' : ''}`}
-          onClick={() => setActiveTab('job-tracker')}
-        >
-          <HiOutlineViewColumns />
-          <span>Job Tracker</span>
-        </button>
+
 
         <button
           className={`mobile-nav-btn ${activeTab === 'ai-resume' ? 'active' : ''}`}

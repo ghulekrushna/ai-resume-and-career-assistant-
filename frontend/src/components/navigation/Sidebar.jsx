@@ -55,13 +55,7 @@ const Sidebar = ({
           }
         ]
       : []),
-    {
-      id: 'job-tracker',
-      label: 'Job Tracker',
-      icon: HiOutlineViewColumns,
-      badge: '5 Active',
-      badgeClass: 'badge-ai'
-    },
+
 
     {
       id: 'ai-resume',
