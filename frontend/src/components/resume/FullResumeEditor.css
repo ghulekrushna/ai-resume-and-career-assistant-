@@ -1439,4 +1439,72 @@ body.dark .full-resume-editor-viewport,
   }
 }
 
+@media (max-width: 580px) {
+  .zoom-control-group,
+  .share-btn,
+  .navbar-icon-btn,
+  .ai-generator-btn {
+    display: none !important;
+  }
+
+  .download-btn {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #2563eb !important;
+    font-weight: 700;
+  }
+}
+
+/* Prominent Export Button in Style & Export Panel */
+.style-export-banner {
+  margin-bottom: 1rem;
+}
+
+.primary-download-action-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  transition: all 0.2s ease;
+}
+
+.primary-download-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+}
+
+/* Floating Mobile Download Button in Paper Preview Tab */
+.mobile-canvas-floating-download {
+  position: sticky;
+  bottom: 16px;
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 30px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  z-index: 100;
+  width: 90%;
+  max-width: 320px;
+}
+
+
 

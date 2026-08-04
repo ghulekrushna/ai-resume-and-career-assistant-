@@ -1381,13 +1381,32 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
             {/* Visual A4 Printable Page Break Guide Line */}
             <div className="a4-page-break-line" />
           </div>
+
+          {/* Floating Mobile Download Button (Visible when in Paper Preview Tab) */}
+          {isMobile && (
+            <button
+              className="mobile-canvas-floating-download"
+              onClick={handleDownload}
+              title="Download Resume PDF"
+            >
+              <HiOutlineArrowDownTray /> Download Resume (PDF)
+            </button>
+          )}
         </main>
 
         {/* RIGHT PANEL: STYLING & TYPOGRAPHY TOOLBAR */}
         <aside className={`editor-right-panel ${isMobile && mobileTab !== 'styles' ? 'mobile-hidden' : ''} ${isMobile && mobileTab === 'styles' ? 'mobile-full-width' : ''}`}>
 
+          {/* Prominent Export Button */}
+          <div className="style-export-banner">
+            <button className="primary-download-action-btn" onClick={handleDownload}>
+              <HiOutlineArrowDownTray /> Download Resume PDF
+            </button>
+          </div>
+
           <div className="right-panel-header">
             <h4>Select an element to edit</h4>
+
             <div className="quick-toolbar">
               <button
                 className={`tool-btn ${styleConfig.isBold ? 'active' : ''}`}
