@@ -547,3 +547,99 @@ body.light .btn-cancel {
   background: #e2e8f0;
   color: #0f172a;
 }
+
+/* Mobile Stage Filter Tabs Bar (<768px) */
+.mobile-kanban-stage-tabs {
+  display: none;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.stage-tab-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+body.light .stage-tab-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.stage-tab-btn.active {
+  background: linear-gradient(135deg, #00C6FF 0%, #7B61FF 100%);
+  color: #ffffff;
+  border-color: #00C6FF;
+  box-shadow: 0 4px 12px rgba(0, 198, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .kanban-container {
+    padding: 12px;
+  }
+
+  .kanban-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .kanban-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kanban-search-input {
+    width: 100%;
+  }
+
+  .add-job-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .kanban-analytics-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .kanban-stat-card {
+    padding: 12px;
+  }
+
+  .mobile-kanban-stage-tabs {
+    display: flex;
+  }
+
+  .kanban-board {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .kanban-column {
+    min-height: auto;
+  }
+
+  .kanban-modal-card {
+    padding: 18px;
+    width: 95%;
+  }
+}
+
+@media (max-width: 480px) {
+  .kanban-analytics-row {
+    grid-template-columns: 1fr;
+  }
+}
+

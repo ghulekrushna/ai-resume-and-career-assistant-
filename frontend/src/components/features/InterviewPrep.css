@@ -220,3 +220,27 @@
   margin-top: 0.5rem;
   justify-content: center;
 }
+
+@media (max-width: 600px) {
+  .prep-categories {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
+  }
+
+  .prep-cat-btn {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.9rem;
+  }
+
+  .eval-score-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .eval-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+

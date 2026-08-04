@@ -96,6 +96,8 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [draggedJobId, setDraggedJobId] = useState(null);
   const [dragOverStage, setDragOverStage] = useState(null);
+  const [mobileColumnFilter, setMobileColumnFilter] = useState('all');
+
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
@@ -310,9 +312,31 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
         </div>
       </div>
 
+      {/* Mobile Stage Filter Bar (<768px) */}
+      <div className="mobile-kanban-stage-tabs hide-scrollbar">
+        <button
+          className={`stage-tab-btn ${mobileColumnFilter === 'all' ? 'active' : ''}`}
+          onClick={() => setMobileColumnFilter('all')}
+        >
+          All ({totalApps})
+        </button>
+        {STAGES.map((stg) => {
+          const count = filteredJobs.filter((j) => j.status === stg.id).length;
+          return (
+            <button
+              key={stg.id}
+              className={`stage-tab-btn ${mobileColumnFilter === stg.id ? 'active' : ''}`}
+              onClick={() => setMobileColumnFilter(stg.id)}
+            >
+              {stg.label} ({count})
+            </button>
+          );
+        })}
+      </div>
+
       {/* Kanban Pipeline Board */}
       <div className="kanban-board">
-        {STAGES.map((stage, stageIdx) => {
+        {STAGES.filter((stg) => mobileColumnFilter === 'all' || stg.id === mobileColumnFilter).map((stage) => {
           const stageJobs = filteredJobs.filter((j) => j.status === stage.id);
           const isOver = dragOverStage === stage.id;
 
@@ -321,6 +345,7 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
               key={stage.id}
               className={`kanban-column ${isOver ? 'is-drag-over' : ''}`}
               onDragOver={(e) => handleDragOver(e, stage.id)}
+
               onDrop={(e) => handleDrop(e, stage.id)}
             >
               <div className="column-header">

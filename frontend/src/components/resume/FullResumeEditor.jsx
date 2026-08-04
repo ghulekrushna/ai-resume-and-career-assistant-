@@ -33,11 +33,24 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
   // Zoom level state
   const [zoomLevel, setZoomLevel] = useState(100);
 
+  // Mobile mode tab state & window width listener
+  const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'preview' | 'styles'
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Radix Animated Sidebar Collapsed State & Shortcut (Ctrl+B / Cmd+B)
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
 
   // Active accordion section on Left Panel
   const [expandedSection, setExpandedSection] = useState('personal');
+
 
   const handleSaveDraft = () => {
     if (onSave) {
@@ -539,11 +552,39 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
         </div>
       </header>
 
+      {/* Mobile View Switcher Tabs (<768px) */}
+      {isMobile && (
+        <div className="mobile-editor-tabs-bar">
+          <button
+            type="button"
+            className={`mobile-editor-tab-btn ${mobileTab === 'editor' ? 'active' : ''}`}
+            onClick={() => setMobileTab('editor')}
+          >
+            <HiOutlineDocumentText /> Form Content
+          </button>
+          <button
+            type="button"
+            className={`mobile-editor-tab-btn ${mobileTab === 'preview' ? 'active' : ''}`}
+            onClick={() => setMobileTab('preview')}
+          >
+            <HiOutlineEye /> Paper Preview
+          </button>
+          <button
+            type="button"
+            className={`mobile-editor-tab-btn ${mobileTab === 'styles' ? 'active' : ''}`}
+            onClick={() => setMobileTab('styles')}
+          >
+            <HiOutlineSparkles /> Style & Export
+          </button>
+        </div>
+      )}
+
       {/* 2. THREE-PANEL CONTAINER */}
       <div className="editor-panels-container">
         
         {/* LEFT PANEL: CONTENT BUILDER */}
-        <aside className={`editor-left-panel ${isLeftSidebarCollapsed ? 'collapsed' : ''}`}>
+        <aside className={`editor-left-panel ${isLeftSidebarCollapsed ? 'collapsed' : ''} ${isMobile && mobileTab !== 'editor' ? 'mobile-hidden' : ''} ${isMobile && mobileTab === 'editor' ? 'mobile-full-width' : ''}`}>
+
           <div
             className="sidebar-rail"
             onClick={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
@@ -941,15 +982,16 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
         </aside>
 
         {/* CENTER CANVAS: LIVE RESUME PAPER (DYNAMIC SECTION ORDERING) */}
-        <main className="editor-center-canvas">
+        <main className={`editor-center-canvas ${isMobile && mobileTab !== 'preview' ? 'mobile-hidden' : ''} ${isMobile && mobileTab === 'preview' ? 'mobile-full-width' : ''}`}>
           <div className="canvas-notice">
             Click preview icon to view full size resume and how it will look after downloading
           </div>
 
           <div
             className="canvas-paper-wrapper"
-            style={{ transform: `scale(${zoomLevel / 100})` }}
+            style={{ transform: `scale(${(zoomLevel / 100) * (isMobile ? Math.min(1, (window.innerWidth - 24) / 670) : 1)})` }}
           >
+
             <div
               className={`resume-paper layout-${template?.layoutStyle || template?.category || 'modern'}`}
               style={{
@@ -1342,7 +1384,8 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
         </main>
 
         {/* RIGHT PANEL: STYLING & TYPOGRAPHY TOOLBAR */}
-        <aside className="editor-right-panel">
+        <aside className={`editor-right-panel ${isMobile && mobileTab !== 'styles' ? 'mobile-hidden' : ''} ${isMobile && mobileTab === 'styles' ? 'mobile-full-width' : ''}`}>
+
           <div className="right-panel-header">
             <h4>Select an element to edit</h4>
             <div className="quick-toolbar">

@@ -541,6 +541,67 @@ body.light .dashboard-top-navbar {
   }
 }
 
+@media (max-width: 768px) {
+  .dashboard-top-navbar {
+    height: 64px;
+    padding: 0 1rem;
+  }
+
+  .dashboard-body {
+    padding: 1rem 1rem 90px 1rem !important;
+  }
+
+  .view-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .career-level-banner-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .level-badge-box {
+    width: 100%;
+    height: 54px;
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .level-num {
+    font-size: 1.2rem;
+  }
+
+  .dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-bottom-nav {
+    display: flex;
+  }
+}
+
+@media (max-width: 520px) {
+  .nav-search-box {
+    width: 140px;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .search-input {
+    font-size: 0.8rem;
+  }
+
+  .streak-badge-pill {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Daily Login Streak Pill */
 .streak-badge-pill {
   background: linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(249, 115, 22, 0.15) 100%);
@@ -610,13 +671,4 @@ body.light .mobile-nav-btn {
   font-size: 20px;
 }
 
-@media (max-width: 768px) {
-  .mobile-bottom-nav {
-    display: flex;
-  }
-  
-  .dashboard-body {
-    padding-bottom: 80px !important;
-  }
-}
 

@@ -315,3 +315,27 @@
   color: #fb7185;
   border: 1px solid rgba(244, 63, 94, 0.3);
 }
+
+@media (max-width: 600px) {
+  .ai-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
+  }
+
+  .ai-tab-btn {
+    white-space: nowrap;
+    font-size: 0.825rem;
+    padding: 0.5rem 0.85rem;
+  }
+
+  .keywords-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tailor-score-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+

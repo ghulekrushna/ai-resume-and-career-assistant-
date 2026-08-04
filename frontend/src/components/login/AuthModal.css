@@ -611,4 +611,26 @@ body.light .chk-item {
   font-weight: 600;
 }
 
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .auth-modal-card {
+    padding: 24px 18px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .auth-title {
+    font-size: 22px;
+  }
+
+  .auth-brain-logo {
+    font-size: 28px;
+  }
+}
+
+
 

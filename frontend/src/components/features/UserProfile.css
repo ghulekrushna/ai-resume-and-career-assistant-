@@ -114,3 +114,20 @@
 .skill-chip-removable button:hover {
   color: #f43f5e;
 }
+
+@media (max-width: 480px) {
+  .avatar-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .add-skill-row {
+    flex-direction: column;
+  }
+
+  .add-skill-row button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

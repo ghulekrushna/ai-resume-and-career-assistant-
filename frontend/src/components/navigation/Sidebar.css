@@ -64,10 +64,21 @@ body.light {
 .logo-text {
   font-family: var(--font-heading, 'Outfit', sans-serif);
   font-weight: 700;
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   color: var(--sidebar-text);
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+@media (max-width: 480px) {
+  .logo-text {
+    font-size: 0.98rem;
+    max-width: 200px;
+  }
+}
+
 
 .mobile-toggle-btn {
   background: transparent;

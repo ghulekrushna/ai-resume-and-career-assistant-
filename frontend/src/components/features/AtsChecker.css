@@ -343,3 +343,23 @@
   color: #cbd5e1;
   line-height: 1.4;
 }
+
+@media (max-width: 600px) {
+  .score-banner-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .breakdown-item {
+    grid-template-columns: 90px 1fr 35px;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+  }
+
+  .upload-drop-zone {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
