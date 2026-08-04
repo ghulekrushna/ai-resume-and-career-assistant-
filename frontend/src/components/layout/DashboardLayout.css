@@ -552,19 +552,22 @@ body.light .dashboard-top-navbar {
   left: 0;
   right: 0;
   height: 64px;
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(15, 23, 42, 0.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   z-index: 9999;
-  justify-content: space-around;
+  justify-content: flex-start;
   align-items: center;
-  padding: 0 4px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  padding: 0 8px;
+  gap: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
 }
 
 body.light .mobile-bottom-nav {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.96);
   border-top-color: #cbd5e1;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
 }
@@ -574,17 +577,19 @@ body.light .mobile-bottom-nav {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 10px;
   font-weight: 600;
   cursor: pointer;
-  padding: 6px 2px;
-  border-radius: 8px;
+  padding: 6px 8px;
+  border-radius: 10px;
   transition: all 0.2s ease;
-  flex: 1;
+  min-width: 74px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 body.light .mobile-nav-btn {
@@ -594,11 +599,18 @@ body.light .mobile-nav-btn {
 .mobile-nav-btn.active {
   color: #00C6FF;
   font-weight: 700;
+  background: rgba(0, 198, 255, 0.1);
+}
+
+body.light .mobile-nav-btn.active {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
 }
 
 .mobile-nav-btn svg {
-  font-size: 20px;
+  font-size: 19px;
 }
+
 
 @media (max-width: 1024px) {
   .dashboard-main-wrapper {

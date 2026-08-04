@@ -22,8 +22,10 @@ import {
   HiOutlineMoon,
   HiOutlinePlus,
   HiOutlineArrowUpRight,
-  HiOutlineCheck
+  HiOutlineCheck,
+  HiOutlineViewColumns
 } from 'react-icons/hi2';
+
 import './DashboardLayout.css';
 
 const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLanding }) => {
@@ -351,50 +353,58 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
       </div>
 
       {/* Mobile Bottom Navigation Bar (< 768px) */}
-      <div className="mobile-bottom-nav">
+      <div className="mobile-bottom-nav hide-scrollbar">
         <button
           className={`mobile-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
           onClick={() => setActiveTab('dashboard')}
         >
           <HiOutlineSquares2X2 />
-          <span>Home</span>
+          <span>Dashboard</span>
         </button>
         <button
           className={`mobile-nav-btn ${activeTab === 'create-resume' || activeTab === 'my-resume' ? 'active' : ''}`}
           onClick={() => setActiveTab('create-resume')}
         >
           <HiOutlineDocumentText />
-          <span>Resume</span>
+          <span>Create Resume</span>
+        </button>
+        <button
+          className={`mobile-nav-btn ${activeTab === 'job-tracker' ? 'active' : ''}`}
+          onClick={() => setActiveTab('job-tracker')}
+        >
+          <HiOutlineViewColumns />
+          <span>Kanban Tracker</span>
         </button>
         <button
           className={`mobile-nav-btn ${activeTab === 'ai-resume' ? 'active' : ''}`}
           onClick={() => setActiveTab('ai-resume')}
         >
           <HiOutlineSparkles />
-          <span>AI Bot</span>
-        </button>
-        <button
-          className={`mobile-nav-btn ${activeTab === 'job-tracker' ? 'active' : ''}`}
-          onClick={() => setActiveTab('job-tracker')}
-        >
-          <HiOutlineBriefcase />
-          <span>Kanban</span>
+          <span>AI Resume</span>
         </button>
         <button
           className={`mobile-nav-btn ${activeTab === 'ats-checker' ? 'active' : ''}`}
           onClick={() => setActiveTab('ats-checker')}
         >
           <HiOutlineShieldCheck />
-          <span>ATS</span>
+          <span>ATS Checker</span>
         </button>
         <button
-          className={`mobile-nav-btn ${activeTab === 'profile' ? 'active' : ''}`}
-          onClick={() => setActiveTab('profile')}
+          className={`mobile-nav-btn ${activeTab === 'job-recommendation' ? 'active' : ''}`}
+          onClick={() => setActiveTab('job-recommendation')}
         >
-          <HiOutlineUser />
-          <span>Profile</span>
+          <HiOutlineBriefcase />
+          <span>Job Recs</span>
+        </button>
+        <button
+          className={`mobile-nav-btn ${activeTab === 'interview-prep' ? 'active' : ''}`}
+          onClick={() => setActiveTab('interview-prep')}
+        >
+          <HiOutlineChatBubbleLeftRight />
+          <span>Interview Prep</span>
         </button>
       </div>
+
 
     </div>
   );
