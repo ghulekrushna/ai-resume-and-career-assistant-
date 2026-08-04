@@ -159,9 +159,9 @@ const Sidebar = ({
       <div className="sidebar-mobile-trigger-bar">
         <div className="sidebar-logo-brand" onClick={() => handleItemClick('dashboard')}>
           <div className="logo-icon-glow">
-            <HiOutlineSparkles className="logo-sparkle" />
+            <img src="/favicon.svg" alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
           </div>
-          <span className="logo-text">ResumAI</span>
+          <span className="logo-text">AI Resume &amp; Career Assistant</span>
         </div>
         <button
           className="mobile-toggle-btn"
@@ -189,13 +189,13 @@ const Sidebar = ({
         {/* Header Section */}
         <div className="sidebar-header">
           <div className="sidebar-brand" onClick={() => handleItemClick('dashboard')}>
-            <div className="brand-icon-box">
-              <HiOutlineSparkles className="brand-icon" />
+            <div className="brand-icon-box" style={{ background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src="/favicon.svg" alt="Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
             </div>
             {!isCollapsed && (
               <div className="brand-info">
-                <span className="brand-name">Resum<span className="brand-highlight">AI</span></span>
-                <span className="brand-tagline">Career Suite</span>
+                <span className="brand-name">AI Resume <span className="brand-highlight">&amp; Career</span></span>
+                <span className="brand-tagline">Assistant Suite</span>
               </div>
             )}
           </div>

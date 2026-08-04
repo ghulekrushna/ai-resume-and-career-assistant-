@@ -66,8 +66,8 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
   // ==========================================
   const brandLogo = (
     <div className="landing-brand" style={{ display: 'flex', alignItems: 'center', gap: '10px', pointerEvents: 'none' }}>
-      <div className="landing-logo" style={{ fontSize: '22px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 'bold' }}>✧</div>
-      <span className="landing-brand-name" style={{ fontFamily: 'var(--font-heading)', fontSize: '18px', fontWeight: 700, color: theme === 'dark' ? '#fff' : '#000', letterSpacing: '-0.5px' }}>ResuAI Coach</span>
+      <img src="/favicon.svg" alt="AI Resume & Career Assistant Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+      <span className="landing-brand-name" style={{ fontFamily: 'var(--font-heading)', fontSize: '18px', fontWeight: 700, color: theme === 'dark' ? '#fff' : '#000', letterSpacing: '-0.5px' }}>AI Resume &amp; Career Assistant</span>
     </div>
   )
 
