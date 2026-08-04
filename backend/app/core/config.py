@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "super_secret_jwt_key_change_in_production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     
-    DATABASE_URL: str = "sqlite:///./sql_app.db"
+    DATABASE_URL: str = "mysql+pymysql://root:root@localhost/ai_resume_db"
     GEMINI_API_KEY: str = ""
 
     class Config:
