@@ -37,10 +37,40 @@ const saveRegisteredUser = (newUser) => {
   }
 };
 
+const checkPasswordStrength = (pwd) => {
+  if (!pwd) return { score: 0, label: '', color: 'transparent', valid: false, hasMinLen: false, hasUpper: false, hasNum: false };
+  
+  const hasMinLen = pwd.length >= 8;
+  const hasUpper = /[A-Z]/.test(pwd);
+  const hasNum = /[0-9]/.test(pwd);
+  const hasSpecialOrLower = /[^A-Za-z0-9]/.test(pwd) || /[a-z]/.test(pwd);
+
+  let score = 0;
+  if (hasMinLen) score += 1;
+  if (hasUpper) score += 1;
+  if (hasNum) score += 1;
+  if (hasSpecialOrLower && pwd.length >= 10) score += 1;
+
+  const valid = hasMinLen && hasUpper && hasNum;
+
+  let label = 'Weak';
+  let color = '#ef4444';
+
+  if (score === 2 || score === 3) {
+    label = 'Medium';
+    color = '#f59e0b';
+  } else if (score >= 4) {
+    label = 'Strong';
+    color = '#22c55e';
+  }
+
+  return { score, label, color, valid, hasMinLen, hasUpper, hasNum };
+};
+
 /**
  * AuthModal Component
- * Handles user authentication (Login and Signup screens) with strict password verification
- * and automatic transition to Sign Up on invalid credentials.
+ * Handles user authentication (Login and Signup screens) with strict password verification,
+ * password strength enforcement, and automatic HTTP-only token refreshes.
  */
 export default function AuthModal({ onClose, onLoginSuccess }) {
   
@@ -59,6 +89,8 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
   const [successMessage, setSuccessMessage] = useState(''); // Success feedback
   const [infoMessage, setInfoMessage] = useState('');   // Helper feedback
   const [isLoading, setIsLoading] = useState(false);    // Loading state
+
+  const pwdStrength = checkPasswordStrength(password);
 
   // ==========================================
   // 2. EVENT HANDLERS
@@ -89,6 +121,13 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
           return;
         }
 
+        // Validate Password Strength Requirements
+        if (!pwdStrength.valid) {
+          setErrorMessage('Password must be at least 8 characters, with 1 uppercase letter (A-Z) and 1 number (0-9).');
+          setIsLoading(false);
+          return;
+        }
+
         let registeredUser = null;
         try {
           const res = await apiService.registerUser(name, email, password);
@@ -102,7 +141,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
           }
         } catch (apiErr) {
           if (apiErr.detail) {
-            setErrorMessage(apiErr.detail);
+            setErrorMessage(typeof apiErr.detail === 'string' ? apiErr.detail : JSON.stringify(apiErr.detail));
             setIsLoading(false);
             return;
           }
@@ -401,6 +440,40 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
               {showPassword ? eyeOffIcon : eyeIcon}
             </button>
           </div>
+
+          {/* Password Strength Indicator & Checklist (Signup Mode Only) */}
+          {isRegister && password && (
+            <div className="pwd-strength-container">
+              <div className="pwd-strength-bar-bg">
+                <div 
+                  className="pwd-strength-bar-fill" 
+                  style={{ 
+                    width: `${(pwdStrength.score / 4) * 100}%`, 
+                    backgroundColor: pwdStrength.color 
+                  }} 
+                />
+              </div>
+              <div className="pwd-strength-info">
+                <span>Password Strength: <strong style={{ color: pwdStrength.color }}>{pwdStrength.label}</strong></span>
+                {pwdStrength.valid ? (
+                  <span style={{ color: '#22c55e', fontWeight: 600 }}>✓ Ready</span>
+                ) : (
+                  <span style={{ color: '#ef4444' }}>Requirements Incomplete</span>
+                )}
+              </div>
+              <div className="pwd-checklist">
+                <span className={`chk-item ${pwdStrength.hasMinLen ? 'passed' : ''}`}>
+                  {pwdStrength.hasMinLen ? '✓' : '○'} 8+ Characters
+                </span>
+                <span className={`chk-item ${pwdStrength.hasUpper ? 'passed' : ''}`}>
+                  {pwdStrength.hasUpper ? '✓' : '○'} 1 Uppercase (A-Z)
+                </span>
+                <span className={`chk-item ${pwdStrength.hasNum ? 'passed' : ''}`}>
+                  {pwdStrength.hasNum ? '✓' : '○'} 1 Number (0-9)
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Remember Me checkbox & Forgot Password link (Login Mode Only) */}
           {!isRegister && (

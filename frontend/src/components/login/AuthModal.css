@@ -551,3 +551,64 @@ body.light .auth-toggle-link {
   to { transform: rotate(360deg); }
 }
 
+/* Password Strength Indicator */
+.pwd-strength-container {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.pwd-strength-bar-bg {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+
+.pwd-strength-bar-fill {
+  height: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 4px;
+}
+
+.pwd-strength-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+body.light .pwd-strength-info {
+  color: #64748b;
+}
+
+.pwd-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.chk-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: color 0.2s ease;
+}
+
+body.light .chk-item {
+  color: #94a3b8;
+}
+
+.chk-item.passed {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+

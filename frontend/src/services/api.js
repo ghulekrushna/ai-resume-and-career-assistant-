@@ -15,6 +15,7 @@ class ApiService {
 
     try {
       const response = await fetch(url, {
+        credentials: 'include',
         ...options,
         headers
       });
@@ -158,6 +159,18 @@ class ApiService {
     return await this.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username, password })
+    });
+  }
+
+  async refreshAuthToken() {
+    return await this.request('/auth/refresh', {
+      method: 'POST'
+    });
+  }
+
+  async logoutUser() {
+    return await this.request('/auth/logout', {
+      method: 'POST'
     });
   }
 
