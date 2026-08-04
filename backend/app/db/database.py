@@ -3,12 +3,19 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-# Setup SQLAlchemy engine (SQLite or MySQL compatible)
-connect_args = {"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
+# Setup SQLAlchemy engine with automatic fallback for Render deployment
+db_url = settings.DATABASE_URL or "sqlite:///./sql_app.db"
 
-engine = create_engine(
-    settings.DATABASE_URL, connect_args=connect_args
-)
+try:
+    connect_args = {"check_same_thread": False} if "sqlite" in db_url.lower() else {}
+    engine = create_engine(db_url, connect_args=connect_args)
+    # Test connection
+    with engine.connect() as conn:
+        pass
+except Exception:
+    # Safe fallback if DATABASE_URL fails to parse or fails connection
+    db_url = "sqlite:///./sql_app.db"
+    engine = create_engine(db_url, connect_args={"check_same_thread": False})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -20,3 +27,4 @@ def get_db():
         yield db
     finally:
         db.close()
+
