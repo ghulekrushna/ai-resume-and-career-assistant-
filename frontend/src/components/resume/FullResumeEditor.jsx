@@ -19,13 +19,15 @@ import {
   HiOutlineBriefcase,
   HiOutlineAcademicCap,
   HiBars3BottomLeft,
-  HiOutlineChevronLeft
+  HiOutlineChevronLeft,
+  HiArrowUp,
+  HiArrowDown,
+  HiBars3
 } from 'react-icons/hi2';
 import './FullResumeEditor.css';
 
 /**
- * Full-Screen 3-Panel Interactive Resume Editor
- * Matches the user reference screenshot with Left Content Panel, Center Canvas, and Right Formatting Bar.
+ * Full-Screen 3-Panel Interactive Resume Editor with Drag-and-Drop Section Reordering
  */
 const FullResumeEditor = ({ template, onClose, onSave }) => {
   // Zoom level state
@@ -72,7 +74,10 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
   // Helper to extract initial data from template prop
   const getInitialResumeData = (tmpl) => {
     if (tmpl?.initialData) {
-      return tmpl.initialData;
+      return {
+        sectionOrder: ['summary', 'employment', 'education', 'skills'],
+        ...tmpl.initialData
+      };
     }
     return {
       profileImage: tmpl?.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256',
@@ -83,6 +88,7 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
       address: 'San Francisco, CA',
       website: 'https://linkedin.com/in/alex-morgan',
       summary: tmpl?.description || 'Results-driven professional with 6+ years of experience building scalable applications, leading cross-functional engineering teams, and optimizing production cloud environments.',
+      sectionOrder: tmpl?.sectionOrder || ['summary', 'employment', 'education', 'skills'],
       experiences: tmpl?.experiences || [
         {
           id: 'exp-1',
@@ -143,11 +149,141 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
   // New item draft states
   const [newSkill, setNewSkill] = useState('');
 
-  // Handlers for zoom
+  // Drag-and-Drop state for Reordering
+  const [draggedSectionIndex, setDraggedSectionIndex] = useState(null);
+  const [draggedExpIndex, setDraggedExpIndex] = useState(null);
+  const [draggedEduIndex, setDraggedEduIndex] = useState(null);
+  const [draggedSkillIndex, setDraggedSkillIndex] = useState(null);
+
+  const sectionOrder = resumeData.sectionOrder || ['summary', 'employment', 'education', 'skills'];
+
+  // Handlers for section reordering
+  const moveSection = (index, direction, e) => {
+    if (e) e.stopPropagation();
+    const currentOrder = [...sectionOrder];
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= currentOrder.length) return;
+    
+    const temp = currentOrder[index];
+    currentOrder[index] = currentOrder[targetIndex];
+    currentOrder[targetIndex] = temp;
+
+    setResumeData((prev) => ({ ...prev, sectionOrder: currentOrder }));
+  };
+
+  const handleSectionDragStart = (e, index) => {
+    setDraggedSectionIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleSectionDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleSectionDrop = (e, dropIndex) => {
+    e.preventDefault();
+    if (draggedSectionIndex === null || draggedSectionIndex === dropIndex) return;
+
+    const currentOrder = [...sectionOrder];
+    const draggedItem = currentOrder[draggedSectionIndex];
+    currentOrder.splice(draggedSectionIndex, 1);
+    currentOrder.splice(dropIndex, 0, draggedItem);
+
+    setResumeData((prev) => ({ ...prev, sectionOrder: currentOrder }));
+    setDraggedSectionIndex(null);
+  };
+
+  // Reorder Experiences
+  const moveExperience = (index, direction, e) => {
+    if (e) e.stopPropagation();
+    const updated = [...resumeData.experiences];
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= updated.length) return;
+
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+
+    setResumeData((prev) => ({ ...prev, experiences: updated }));
+  };
+
+  const handleExpDragStart = (e, index) => {
+    setDraggedExpIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleExpDrop = (e, dropIndex) => {
+    e.preventDefault();
+    if (draggedExpIndex === null || draggedExpIndex === dropIndex) return;
+
+    const updated = [...resumeData.experiences];
+    const draggedItem = updated[draggedExpIndex];
+    updated.splice(draggedExpIndex, 1);
+    updated.splice(dropIndex, 0, draggedItem);
+
+    setResumeData((prev) => ({ ...prev, experiences: updated }));
+    setDraggedExpIndex(null);
+  };
+
+  // Reorder Educations
+  const moveEducation = (index, direction, e) => {
+    if (e) e.stopPropagation();
+    const updated = [...resumeData.educations];
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= updated.length) return;
+
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+
+    setResumeData((prev) => ({ ...prev, educations: updated }));
+  };
+
+  const handleEduDrop = (e, dropIndex) => {
+    e.preventDefault();
+    if (draggedEduIndex === null || draggedEduIndex === dropIndex) return;
+
+    const updated = [...resumeData.educations];
+    const draggedItem = updated[draggedEduIndex];
+    updated.splice(draggedEduIndex, 1);
+    updated.splice(dropIndex, 0, draggedItem);
+
+    setResumeData((prev) => ({ ...prev, educations: updated }));
+    setDraggedEduIndex(null);
+  };
+
+  // Reorder Skills
+  const moveSkill = (index, direction, e) => {
+    if (e) e.stopPropagation();
+    const updated = [...resumeData.skills];
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= updated.length) return;
+
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+
+    setResumeData((prev) => ({ ...prev, skills: updated }));
+  };
+
+  const handleSkillDrop = (e, dropIndex) => {
+    e.preventDefault();
+    if (draggedSkillIndex === null || draggedSkillIndex === dropIndex) return;
+
+    const updated = [...resumeData.skills];
+    const draggedItem = updated[draggedSkillIndex];
+    updated.splice(draggedSkillIndex, 1);
+    updated.splice(dropIndex, 0, draggedItem);
+
+    setResumeData((prev) => ({ ...prev, skills: updated }));
+    setDraggedSkillIndex(null);
+  };
+
+  // Zoom handlers
   const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 10, 160));
   const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 10, 50));
 
-  // Handler for dynamic style updates
   const updateStyle = (key, value) => {
     setStyleConfig((prev) => ({ ...prev, [key]: value }));
   };
@@ -168,7 +304,6 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
     reader.readAsDataURL(file);
   };
 
-  // Add / Remove Experience
   const addExperience = () => {
     setResumeData((prev) => ({
       ...prev,
@@ -192,7 +327,6 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
     }));
   };
 
-  // Add / Remove Skills
   const handleAddSkill = (e) => {
     if (e.key === 'Enter' && newSkill.trim()) {
       setResumeData((prev) => ({
@@ -210,12 +344,43 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
     }));
   };
 
-  // Handle Download for ONLY the User Selected Resume
+  // Generate Download HTML respecting user section order
   const handleDownload = () => {
     const rawName = resumeData.fullName || 'Selected_Resume';
     const formattedName = rawName.replace(/\s+/g, '_');
     
-    // Generate clean standalone HTML document for ONLY the user selected resume
+    // Map section blocks according to user's sectionOrder
+    const sectionHtmlMap = {
+      summary: resumeData.summary ? `<div class="section-title">Professional Summary</div><div class="summary">${resumeData.summary}</div>` : '',
+      employment: (resumeData.experiences && resumeData.experiences.length > 0) ? `
+        <div class="section-title">Work Experience</div>
+        ${resumeData.experiences.map(exp => `
+          <div class="exp-item">
+            <div class="exp-row"><span>${exp.title || ''}</span> <span>${exp.period || ''}</span></div>
+            <div class="exp-company">${exp.company || ''}</div>
+            <div class="exp-desc">${exp.description || ''}</div>
+          </div>
+        `).join('')}
+      ` : '',
+      education: (resumeData.educations && resumeData.educations.length > 0) ? `
+        <div class="section-title">Education</div>
+        ${resumeData.educations.map(edu => `
+          <div class="exp-item">
+            <div class="exp-row"><span>${edu.degree || ''}</span> <span>${edu.year || ''}</span></div>
+            <div class="exp-company">${edu.institution || ''}</div>
+          </div>
+        `).join('')}
+      ` : '',
+      skills: (resumeData.skills && resumeData.skills.length > 0) ? `
+        <div class="section-title">Core Technical Skills</div>
+        <div class="skills-flex">
+          ${resumeData.skills.map(s => `<span class="skill-badge">${s}</span>`).join('')}
+        </div>
+      ` : ''
+    };
+
+    const reorderedBodyHtml = sectionOrder.map(key => sectionHtmlMap[key] || '').join('');
+
     const selectedResumeHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -248,36 +413,7 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
       <div class="title">${resumeData.jobTitle || ''}</div>
       <div class="contact">${resumeData.email || ''} | ${resumeData.phone || ''} | ${resumeData.address || ''}</div>
     </div>
-    
-    ${resumeData.summary ? `<div class="section-title">Professional Summary</div><div class="summary">${resumeData.summary}</div>` : ''}
-
-    ${resumeData.skills && resumeData.skills.length > 0 ? `
-      <div class="section-title">Core Technical Skills</div>
-      <div class="skills-flex">
-        ${resumeData.skills.map(s => `<span class="skill-badge">${s}</span>`).join('')}
-      </div>
-    ` : ''}
-
-    ${resumeData.experiences && resumeData.experiences.length > 0 ? `
-      <div class="section-title">Work Experience</div>
-      ${resumeData.experiences.map(exp => `
-        <div class="exp-item">
-          <div class="exp-row"><span>${exp.title || ''}</span> <span>${exp.period || ''}</span></div>
-          <div class="exp-company">${exp.company || ''}</div>
-          <div class="exp-desc">${exp.description || ''}</div>
-        </div>
-      `).join('')}
-    ` : ''}
-
-    ${resumeData.educations && resumeData.educations.length > 0 ? `
-      <div class="section-title">Education</div>
-      ${resumeData.educations.map(edu => `
-        <div class="exp-item">
-          <div class="exp-row"><span>${edu.degree || ''}</span> <span>${edu.year || ''}</span></div>
-          <div class="exp-company">${edu.institution || ''}</div>
-        </div>
-      `).join('')}
-    ` : ''}
+    ${reorderedBodyHtml}
   </div>
   <script>
     window.onload = function() {
@@ -287,7 +423,6 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
 </body>
 </html>`;
 
-    // Trigger instant download of ONLY the user's selected resume document
     const blob = new Blob([selectedResumeHtml], { type: 'text/html;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -299,6 +434,14 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
     URL.revokeObjectURL(url);
   };
 
+  // Section title mapping
+  const sectionMeta = {
+    summary: { title: 'Professional Summary', icon: <HiOutlineDocumentText /> },
+    employment: { title: 'Employment History', icon: <HiOutlineBriefcase /> },
+    education: { title: 'Education', icon: <HiOutlineAcademicCap /> },
+    skills: { title: 'Skills', icon: <HiOutlineSparkles /> }
+  };
+
   return (
     <div className="full-resume-editor-viewport">
       {/* 1. TOP NAVBAR HEADER */}
@@ -308,7 +451,6 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
             <HiArrowLeft /> Back to Templates
           </button>
 
-          {/* Radix SidebarTrigger Button */}
           <button
             className={`sidebar-trigger-btn ${isLeftSidebarCollapsed ? 'is-collapsed' : ''}`}
             onClick={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
@@ -364,9 +506,8 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
       {/* 2. THREE-PANEL CONTAINER */}
       <div className="editor-panels-container">
         
-        {/* LEFT PANEL: CONTENT BUILDER (Radix Animated Collapsible Sidebar) */}
+        {/* LEFT PANEL: CONTENT BUILDER */}
         <aside className={`editor-left-panel ${isLeftSidebarCollapsed ? 'collapsed' : ''}`}>
-          {/* Radix Sidebar Rail Handle */}
           <div
             className="sidebar-rail"
             onClick={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
@@ -374,7 +515,6 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
           />
 
           {isLeftSidebarCollapsed ? (
-            /* Icon-Only Collapsed Sidebar Navigation */
             <div className="collapsed-sidebar-nav">
               <button
                 className={`collapsed-nav-btn ${expandedSection === 'personal' ? 'active' : ''}`}
@@ -388,53 +528,20 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
                 <span className="sidebar-tooltip-popup">Personal Information</span>
               </button>
 
-              <button
-                className={`collapsed-nav-btn ${expandedSection === 'summary' ? 'active' : ''}`}
-                onClick={() => {
-                  setExpandedSection('summary');
-                  setIsLeftSidebarCollapsed(false);
-                }}
-                title="Professional Summary"
-              >
-                <HiOutlineDocumentText />
-                <span className="sidebar-tooltip-popup">Professional Summary</span>
-              </button>
-
-              <button
-                className={`collapsed-nav-btn ${expandedSection === 'employment' ? 'active' : ''}`}
-                onClick={() => {
-                  setExpandedSection('employment');
-                  setIsLeftSidebarCollapsed(false);
-                }}
-                title="Employment History"
-              >
-                <HiOutlineBriefcase />
-                <span className="sidebar-tooltip-popup">Employment History</span>
-              </button>
-
-              <button
-                className={`collapsed-nav-btn ${expandedSection === 'education' ? 'active' : ''}`}
-                onClick={() => {
-                  setExpandedSection('education');
-                  setIsLeftSidebarCollapsed(false);
-                }}
-                title="Education"
-              >
-                <HiOutlineAcademicCap />
-                <span className="sidebar-tooltip-popup">Education</span>
-              </button>
-
-              <button
-                className={`collapsed-nav-btn ${expandedSection === 'skills' ? 'active' : ''}`}
-                onClick={() => {
-                  setExpandedSection('skills');
-                  setIsLeftSidebarCollapsed(false);
-                }}
-                title="Skills"
-              >
-                <HiOutlineSparkles />
-                <span className="sidebar-tooltip-popup">Skills</span>
-              </button>
+              {sectionOrder.map((key) => (
+                <button
+                  key={key}
+                  className={`collapsed-nav-btn ${expandedSection === key ? 'active' : ''}`}
+                  onClick={() => {
+                    setExpandedSection(key);
+                    setIsLeftSidebarCollapsed(false);
+                  }}
+                  title={sectionMeta[key]?.title}
+                >
+                  {sectionMeta[key]?.icon}
+                  <span className="sidebar-tooltip-popup">{sectionMeta[key]?.title}</span>
+                </button>
+              ))}
             </div>
           ) : (
             <>
@@ -443,8 +550,15 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
                 <button className="panel-tab">Templates</button>
               </div>
 
+              {/* Drag and Drop Instruction Banner */}
+              <div className="section-reorder-banner">
+                <strong>
+                  <HiBars3 /> Drag or use ↑ ↓ to reorder sections
+                </strong>
+              </div>
+
               <div className="accordion-wrapper">
-                {/* Personal Information Accordion */}
+                {/* Personal Information Accordion (Fixed Header) */}
                 <div className="accordion-item">
                   <button
                     className="accordion-header"
@@ -531,184 +645,266 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
                   )}
                 </div>
 
-                {/* Professional Summary Accordion */}
-                <div className="accordion-item">
-                  <button
-                    className="accordion-header"
-                    onClick={() => setExpandedSection(expandedSection === 'summary' ? '' : 'summary')}
-                  >
-                    <span>Professional Summary</span>
-                    {expandedSection === 'summary' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
-                  </button>
+                {/* DYNAMIC DRAGGABLE ACCORDION SECTIONS */}
+                {sectionOrder.map((sectionKey, idx) => {
+                  const isDragging = draggedSectionIndex === idx;
 
-                  {expandedSection === 'summary' && (
-                    <div className="accordion-content">
-                      <div className="form-group">
-                        <textarea
-                          rows={5}
-                          value={resumeData.summary}
-                          onChange={(e) => setResumeData({ ...resumeData, summary: e.target.value })}
-                        />
+                  return (
+                    <div
+                      key={sectionKey}
+                      className={`accordion-item ${isDragging ? 'is-dragging' : ''}`}
+                      draggable
+                      onDragStart={(e) => handleSectionDragStart(e, idx)}
+                      onDragOver={handleSectionDragOver}
+                      onDrop={(e) => handleSectionDrop(e, idx)}
+                    >
+                      <div
+                        className="accordion-header"
+                        onClick={() => setExpandedSection(expandedSection === sectionKey ? '' : sectionKey)}
+                      >
+                        <span className="drag-handle-btn" title="Drag to reorder section">
+                          <HiBars3 />
+                        </span>
+
+                        <span style={{ flex: 1, marginLeft: 6 }}>{sectionMeta[sectionKey]?.title}</span>
+
+                        {/* Reorder Action Buttons */}
+                        <div className="reorder-actions" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="reorder-btn"
+                            disabled={idx === 0}
+                            onClick={(e) => moveSection(idx, -1, e)}
+                            title="Move section up"
+                          >
+                            <HiArrowUp />
+                          </button>
+                          <button
+                            className="reorder-btn"
+                            disabled={idx === sectionOrder.length - 1}
+                            onClick={(e) => moveSection(idx, 1, e)}
+                            title="Move section down"
+                          >
+                            <HiArrowDown />
+                          </button>
+                        </div>
+
+                        {expandedSection === sectionKey ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
                       </div>
-                      <button className="ai-polish-btn">
-                        <HiOutlineSparkles /> Polish Summary with AI
-                      </button>
-                    </div>
-                  )}
-                </div>
 
-                {/* Employment History Accordion */}
-                <div className="accordion-item">
-                  <button
-                    className="accordion-header"
-                    onClick={() => setExpandedSection(expandedSection === 'employment' ? '' : 'employment')}
-                  >
-                    <span>Employment History</span>
-                    {expandedSection === 'employment' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
-                  </button>
-
-                  {expandedSection === 'employment' && (
-                    <div className="accordion-content">
-                      {resumeData.experiences.map((exp, idx) => (
-                        <div key={exp.id} className="item-card">
-                          <div className="card-top">
-                            <strong>Job #{idx + 1}</strong>
-                            <button className="delete-item-btn" onClick={() => removeExperience(exp.id)}>
-                              <HiOutlineTrash />
-                            </button>
-                          </div>
-
+                      {/* SUMMARY CONTENT */}
+                      {sectionKey === 'summary' && expandedSection === 'summary' && (
+                        <div className="accordion-content">
                           <div className="form-group">
-                            <label>Company</label>
-                            <input
-                              type="text"
-                              value={exp.company}
-                              onChange={(e) => {
-                                const updated = [...resumeData.experiences];
-                                updated[idx].company = e.target.value;
-                                setResumeData({ ...resumeData, experiences: updated });
-                              }}
-                            />
-                          </div>
-
-                          <div className="form-group">
-                            <label>Role</label>
-                            <input
-                              type="text"
-                              value={exp.title}
-                              onChange={(e) => {
-                                const updated = [...resumeData.experiences];
-                                updated[idx].title = e.target.value;
-                                setResumeData({ ...resumeData, experiences: updated });
-                              }}
-                            />
-                          </div>
-
-                          <div className="form-group">
-                            <label>Description</label>
                             <textarea
-                              rows={3}
-                              value={exp.description}
-                              onChange={(e) => {
-                                const updated = [...resumeData.experiences];
-                                updated[idx].description = e.target.value;
-                                setResumeData({ ...resumeData, experiences: updated });
-                              }}
+                              rows={5}
+                              value={resumeData.summary}
+                              onChange={(e) => setResumeData({ ...resumeData, summary: e.target.value })}
+                            />
+                          </div>
+                          <button className="ai-polish-btn">
+                            <HiOutlineSparkles /> Polish Summary with AI
+                          </button>
+                        </div>
+                      )}
+
+                      {/* EMPLOYMENT CONTENT */}
+                      {sectionKey === 'employment' && expandedSection === 'employment' && (
+                        <div className="accordion-content">
+                          {resumeData.experiences.map((exp, expIdx) => (
+                            <div
+                              key={exp.id}
+                              className={`item-card ${draggedExpIndex === expIdx ? 'is-dragging' : ''}`}
+                              draggable
+                              onDragStart={(e) => handleExpDragStart(e, expIdx)}
+                              onDragOver={handleSectionDragOver}
+                              onDrop={(e) => handleExpDrop(e, expIdx)}
+                            >
+                              <div className="card-top">
+                                <span className="drag-handle-btn" title="Drag to reorder job">
+                                  <HiBars3 />
+                                </span>
+                                <strong>Job #{expIdx + 1}</strong>
+
+                                <div className="reorder-actions" style={{ marginLeft: 'auto' }}>
+                                  <button
+                                    className="reorder-btn"
+                                    disabled={expIdx === 0}
+                                    onClick={(e) => moveExperience(expIdx, -1, e)}
+                                    title="Move job up"
+                                  >
+                                    <HiArrowUp />
+                                  </button>
+                                  <button
+                                    className="reorder-btn"
+                                    disabled={expIdx === resumeData.experiences.length - 1}
+                                    onClick={(e) => moveExperience(expIdx, 1, e)}
+                                    title="Move job down"
+                                  >
+                                    <HiArrowDown />
+                                  </button>
+                                </div>
+
+                                <button className="delete-item-btn" onClick={() => removeExperience(exp.id)}>
+                                  <HiOutlineTrash />
+                                </button>
+                              </div>
+
+                              <div className="form-group">
+                                <label>Company</label>
+                                <input
+                                  type="text"
+                                  value={exp.company}
+                                  onChange={(e) => {
+                                    const updated = [...resumeData.experiences];
+                                    updated[expIdx].company = e.target.value;
+                                    setResumeData({ ...resumeData, experiences: updated });
+                                  }}
+                                />
+                              </div>
+
+                              <div className="form-group">
+                                <label>Role</label>
+                                <input
+                                  type="text"
+                                  value={exp.title}
+                                  onChange={(e) => {
+                                    const updated = [...resumeData.experiences];
+                                    updated[expIdx].title = e.target.value;
+                                    setResumeData({ ...resumeData, experiences: updated });
+                                  }}
+                                />
+                              </div>
+
+                              <div className="form-group">
+                                <label>Description</label>
+                                <textarea
+                                  rows={3}
+                                  value={exp.description}
+                                  onChange={(e) => {
+                                    const updated = [...resumeData.experiences];
+                                    updated[expIdx].description = e.target.value;
+                                    setResumeData({ ...resumeData, experiences: updated });
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+
+                          <button className="add-new-btn" onClick={addExperience}>
+                            <HiOutlinePlus /> Add Employment
+                          </button>
+                        </div>
+                      )}
+
+                      {/* EDUCATION CONTENT */}
+                      {sectionKey === 'education' && expandedSection === 'education' && (
+                        <div className="accordion-content">
+                          {resumeData.educations.map((edu, eduIdx) => (
+                            <div
+                              key={edu.id}
+                              className={`item-card ${draggedEduIndex === eduIdx ? 'is-dragging' : ''}`}
+                              draggable
+                              onDragStart={() => setDraggedEduIndex(eduIdx)}
+                              onDragOver={handleSectionDragOver}
+                              onDrop={(e) => handleEduDrop(e, eduIdx)}
+                            >
+                              <div className="card-top">
+                                <span className="drag-handle-btn">
+                                  <HiBars3 />
+                                </span>
+                                <strong>Education #{eduIdx + 1}</strong>
+
+                                <div className="reorder-actions">
+                                  <button
+                                    className="reorder-btn"
+                                    disabled={eduIdx === 0}
+                                    onClick={(e) => moveEducation(eduIdx, -1, e)}
+                                  >
+                                    <HiArrowUp />
+                                  </button>
+                                  <button
+                                    className="reorder-btn"
+                                    disabled={eduIdx === resumeData.educations.length - 1}
+                                    onClick={(e) => moveEducation(eduIdx, 1, e)}
+                                  >
+                                    <HiArrowDown />
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="form-group">
+                                <label>Degree</label>
+                                <input
+                                  type="text"
+                                  value={edu.degree}
+                                  onChange={(e) => {
+                                    const updated = [...resumeData.educations];
+                                    updated[eduIdx].degree = e.target.value;
+                                    setResumeData({ ...resumeData, educations: updated });
+                                  }}
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label>Institution</label>
+                                <input
+                                  type="text"
+                                  value={edu.institution}
+                                  onChange={(e) => {
+                                    const updated = [...resumeData.educations];
+                                    updated[eduIdx].institution = e.target.value;
+                                    setResumeData({ ...resumeData, educations: updated });
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* SKILLS CONTENT */}
+                      {sectionKey === 'skills' && expandedSection === 'skills' && (
+                        <div className="accordion-content">
+                          <div className="skills-chip-container">
+                            {resumeData.skills.map((skill, skillIdx) => (
+                              <span
+                                key={skillIdx}
+                                className="editor-skill-chip-draggable"
+                                draggable
+                                onDragStart={() => setDraggedSkillIndex(skillIdx)}
+                                onDragOver={handleSectionDragOver}
+                                onDrop={(e) => handleSkillDrop(e, skillIdx)}
+                              >
+                                <span className="drag-handle-btn" style={{ padding: 0 }}>
+                                  <HiBars3 />
+                                </span>
+                                {skill}
+                                <button className="reorder-btn" style={{ width: 18, height: 18 }} onClick={(e) => moveSkill(skillIdx, -1, e)} disabled={skillIdx === 0}>‹</button>
+                                <button className="reorder-btn" style={{ width: 18, height: 18 }} onClick={(e) => moveSkill(skillIdx, 1, e)} disabled={skillIdx === resumeData.skills.length - 1}>›</button>
+                                <button onClick={() => removeSkill(skillIdx)}>×</button>
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="form-group">
+                            <input
+                              type="text"
+                              placeholder="Type a skill & hit Enter..."
+                              value={newSkill}
+                              onChange={(e) => setNewSkill(e.target.value)}
+                              onKeyDown={handleAddSkill}
                             />
                           </div>
                         </div>
-                      ))}
-
-                      <button className="add-new-btn" onClick={addExperience}>
-                        <HiOutlinePlus /> Add Employment
-                      </button>
+                      )}
                     </div>
-                  )}
-                </div>
-
-                {/* Education Accordion */}
-                <div className="accordion-item">
-                  <button
-                    className="accordion-header"
-                    onClick={() => setExpandedSection(expandedSection === 'education' ? '' : 'education')}
-                  >
-                    <span>Education</span>
-                    {expandedSection === 'education' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
-                  </button>
-
-                  {expandedSection === 'education' && (
-                    <div className="accordion-content">
-                      {resumeData.educations.map((edu, idx) => (
-                        <div key={edu.id} className="item-card">
-                          <div className="form-group">
-                            <label>Degree</label>
-                            <input
-                              type="text"
-                              value={edu.degree}
-                              onChange={(e) => {
-                                const updated = [...resumeData.educations];
-                                updated[idx].degree = e.target.value;
-                                setResumeData({ ...resumeData, educations: updated });
-                              }}
-                            />
-                          </div>
-                          <div className="form-group">
-                            <label>Institution</label>
-                            <input
-                              type="text"
-                              value={edu.institution}
-                              onChange={(e) => {
-                                const updated = [...resumeData.educations];
-                                updated[idx].institution = e.target.value;
-                                setResumeData({ ...resumeData, educations: updated });
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Skills Accordion */}
-                <div className="accordion-item">
-                  <button
-                    className="accordion-header"
-                    onClick={() => setExpandedSection(expandedSection === 'skills' ? '' : 'skills')}
-                  >
-                    <span>Skills</span>
-                    {expandedSection === 'skills' ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
-                  </button>
-
-                  {expandedSection === 'skills' && (
-                    <div className="accordion-content">
-                      <div className="skills-chip-container">
-                        {resumeData.skills.map((skill, index) => (
-                          <span key={index} className="editor-skill-chip">
-                            {skill}
-                            <button onClick={() => removeSkill(index)}>×</button>
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="form-group">
-                        <input
-                          type="text"
-                          placeholder="Type a skill & hit Enter..."
-                          value={newSkill}
-                          onChange={(e) => setNewSkill(e.target.value)}
-                          onKeyDown={handleAddSkill}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  );
+                })}
               </div>
             </>
           )}
         </aside>
 
-        {/* CENTER CANVAS: LIVE RESUME PAPER */}
+        {/* CENTER CANVAS: LIVE RESUME PAPER (DYNAMIC SECTION ORDERING) */}
         <main className="editor-center-canvas">
           <div className="canvas-notice">
             Click preview icon to view full size resume and how it will look after downloading
@@ -745,56 +941,70 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
                     </div>
                   </div>
 
-                  <div className="ats-section">
-                    <h3 className="ats-section-heading" style={{ borderBottomColor: styleConfig.accentColor, color: styleConfig.accentColor }}>
-                      PROFESSIONAL SUMMARY
-                    </h3>
-                    <p className="summary-paragraph">{resumeData.summary}</p>
-                  </div>
-
-                  <div className="ats-section">
-                    <h3 className="ats-section-heading" style={{ borderBottomColor: styleConfig.accentColor, color: styleConfig.accentColor }}>
-                      WORK EXPERIENCE
-                    </h3>
-                    {resumeData.experiences.map((exp) => (
-                      <div key={exp.id} className="ats-exp-block">
-                        <div className="ats-exp-row">
-                          <strong className="exp-role-title">{exp.title}</strong>
-                          <span className="exp-date">{exp.period}</span>
+                  {sectionOrder.map((key) => {
+                    if (key === 'summary' && resumeData.summary) {
+                      return (
+                        <div key="summary" className="ats-section">
+                          <h3 className="ats-section-heading" style={{ borderBottomColor: styleConfig.accentColor, color: styleConfig.accentColor }}>
+                            PROFESSIONAL SUMMARY
+                          </h3>
+                          <p className="summary-paragraph">{resumeData.summary}</p>
                         </div>
-                        <div className="ats-company-name">{exp.company}</div>
-                        <p className="exp-body">{exp.description}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="ats-section">
-                    <h3 className="ats-section-heading" style={{ borderBottomColor: styleConfig.accentColor, color: styleConfig.accentColor }}>
-                      EDUCATION
-                    </h3>
-                    {resumeData.educations.map((edu) => (
-                      <div key={edu.id} className="ats-edu-block">
-                        <div className="ats-exp-row">
-                          <strong className="edu-degree">{edu.degree}</strong>
-                          <span className="exp-date">{edu.year}</span>
+                      );
+                    }
+                    if (key === 'employment' && resumeData.experiences?.length > 0) {
+                      return (
+                        <div key="employment" className="ats-section">
+                          <h3 className="ats-section-heading" style={{ borderBottomColor: styleConfig.accentColor, color: styleConfig.accentColor }}>
+                            WORK EXPERIENCE
+                          </h3>
+                          {resumeData.experiences.map((exp) => (
+                            <div key={exp.id} className="ats-exp-block">
+                              <div className="ats-exp-row">
+                                <strong className="exp-role-title">{exp.title}</strong>
+                                <span className="exp-date">{exp.period}</span>
+                              </div>
+                              <div className="ats-company-name">{exp.company}</div>
+                              <p className="exp-body">{exp.description}</p>
+                            </div>
+                          ))}
                         </div>
-                        <div className="edu-school">{edu.institution}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="ats-section">
-                    <h3 className="ats-section-heading" style={{ borderBottomColor: styleConfig.accentColor, color: styleConfig.accentColor }}>
-                      TECHNICAL SKILLS & COMPETENCIES
-                    </h3>
-                    <div className="ats-skills-wrap">
-                      {resumeData.skills.map((s, i) => (
-                        <span key={i} className="ats-skill-badge">
-                          • {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                      );
+                    }
+                    if (key === 'education' && resumeData.educations?.length > 0) {
+                      return (
+                        <div key="education" className="ats-section">
+                          <h3 className="ats-section-heading" style={{ borderBottomColor: styleConfig.accentColor, color: styleConfig.accentColor }}>
+                            EDUCATION
+                          </h3>
+                          {resumeData.educations.map((edu) => (
+                            <div key={edu.id} className="ats-edu-block">
+                              <div className="ats-exp-row">
+                                <strong className="edu-degree">{edu.degree}</strong>
+                                <span className="exp-date">{edu.year}</span>
+                              </div>
+                              <div className="edu-school">{edu.institution}</div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                    if (key === 'skills' && resumeData.skills?.length > 0) {
+                      return (
+                        <div key="skills" className="ats-section">
+                          <h3 className="ats-section-heading" style={{ borderBottomColor: styleConfig.accentColor, color: styleConfig.accentColor }}>
+                            TECHNICAL SKILLS & COMPETENCIES
+                          </h3>
+                          <div className="ats-skills-wrap">
+                            {resumeData.skills.map((s, i) => (
+                              <span key={i} className="ats-skill-badge">• {s}</span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
                 </div>
               )}
 
@@ -809,48 +1019,64 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
                     </div>
                   </div>
 
-                  <div className="exec-summary-box">
-                    <p className="exec-summary-text">{resumeData.summary}</p>
-                  </div>
-
-                  <div className="exec-grid-container">
-                    <div className="exec-col-main">
-                      <h3 className="exec-heading" style={{ color: styleConfig.accentColor, borderBottomColor: styleConfig.accentColor }}>
-                        EXECUTIVE EXPERIENCE
-                      </h3>
-                      {resumeData.experiences.map((exp) => (
-                        <div key={exp.id} className="exec-exp-card">
-                          <div className="exec-card-head">
-                            <strong className="exec-role">{exp.title}</strong>
-                            <span className="exec-period">{exp.period}</span>
-                          </div>
-                          <span className="exec-company">{exp.company}</span>
-                          <p className="exec-desc">{exp.description}</p>
+                  {sectionOrder.map((key) => {
+                    if (key === 'summary' && resumeData.summary) {
+                      return (
+                        <div key="summary" className="exec-summary-box">
+                          <p className="exec-summary-text">{resumeData.summary}</p>
                         </div>
-                      ))}
-                    </div>
-
-                    <div className="exec-col-side">
-                      <h3 className="exec-heading" style={{ color: styleConfig.accentColor, borderBottomColor: styleConfig.accentColor }}>
-                        BOARD & EDUCATION
-                      </h3>
-                      {resumeData.educations.map((edu) => (
-                        <div key={edu.id} className="exec-edu-card">
-                          <strong>{edu.degree}</strong>
-                          <div className="exec-institution">{edu.institution} ({edu.year})</div>
+                      );
+                    }
+                    if (key === 'employment' && resumeData.experiences?.length > 0) {
+                      return (
+                        <div key="employment" style={{ marginBottom: '1.25rem' }}>
+                          <h3 className="exec-heading" style={{ color: styleConfig.accentColor, borderBottomColor: styleConfig.accentColor }}>
+                            EXECUTIVE EXPERIENCE
+                          </h3>
+                          {resumeData.experiences.map((exp) => (
+                            <div key={exp.id} className="exec-exp-card">
+                              <div className="exec-card-head">
+                                <strong className="exec-role">{exp.title}</strong>
+                                <span className="exec-period">{exp.period}</span>
+                              </div>
+                              <span className="exec-company">{exp.company}</span>
+                              <p className="exec-desc">{exp.description}</p>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-
-                      <h3 className="exec-heading" style={{ color: styleConfig.accentColor, borderBottomColor: styleConfig.accentColor, marginTop: '1.25rem' }}>
-                        CORE COMPETENCIES
-                      </h3>
-                      <ul className="exec-skills-list">
-                        {resumeData.skills.map((s, i) => (
-                          <li key={i}>❖ {s}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
+                      );
+                    }
+                    if (key === 'education' && resumeData.educations?.length > 0) {
+                      return (
+                        <div key="education" style={{ marginBottom: '1.25rem' }}>
+                          <h3 className="exec-heading" style={{ color: styleConfig.accentColor, borderBottomColor: styleConfig.accentColor }}>
+                            BOARD & EDUCATION
+                          </h3>
+                          {resumeData.educations.map((edu) => (
+                            <div key={edu.id} className="exec-edu-card">
+                              <strong>{edu.degree}</strong>
+                              <div className="exec-institution">{edu.institution} ({edu.year})</div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                    if (key === 'skills' && resumeData.skills?.length > 0) {
+                      return (
+                        <div key="skills" style={{ marginBottom: '1.25rem' }}>
+                          <h3 className="exec-heading" style={{ color: styleConfig.accentColor, borderBottomColor: styleConfig.accentColor }}>
+                            CORE COMPETENCIES
+                          </h3>
+                          <ul className="exec-skills-list">
+                            {resumeData.skills.map((s, i) => (
+                              <li key={i}>❖ {s}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
                 </div>
               )}
 
@@ -874,47 +1100,67 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
 
                   <div className="creative-body-grid">
                     <div className="creative-main-content">
-                      <div className="creative-section-card">
-                        <h3 className="creative-heading" style={{ color: styleConfig.accentColor }}>ABOUT ME</h3>
-                        <p className="summary-paragraph">{resumeData.summary}</p>
-                      </div>
-
-                      <div className="creative-section-card">
-                        <h3 className="creative-heading" style={{ color: styleConfig.accentColor }}>CAREER HIGHLIGHTS</h3>
-                        {resumeData.experiences.map((exp) => (
-                          <div key={exp.id} className="creative-exp-item">
-                            <div className="creative-exp-head">
-                              <strong>{exp.title}</strong>
-                              <span className="creative-badge" style={{ backgroundColor: styleConfig.accentColor }}>{exp.period}</span>
+                      {sectionOrder.map((key) => {
+                        if (key === 'summary' && resumeData.summary) {
+                          return (
+                            <div key="summary" className="creative-section-card">
+                              <h3 className="creative-heading" style={{ color: styleConfig.accentColor }}>ABOUT ME</h3>
+                              <p className="summary-paragraph">{resumeData.summary}</p>
                             </div>
-                            <div className="creative-company">{exp.company}</div>
-                            <p className="exp-body">{exp.description}</p>
-                          </div>
-                        ))}
-                      </div>
+                          );
+                        }
+                        if (key === 'employment' && resumeData.experiences?.length > 0) {
+                          return (
+                            <div key="employment" className="creative-section-card">
+                              <h3 className="creative-heading" style={{ color: styleConfig.accentColor }}>CAREER HIGHLIGHTS</h3>
+                              {resumeData.experiences.map((exp) => (
+                                <div key={exp.id} className="creative-exp-item">
+                                  <div className="creative-exp-head">
+                                    <strong>{exp.title}</strong>
+                                    <span className="creative-badge" style={{ backgroundColor: styleConfig.accentColor }}>{exp.period}</span>
+                                  </div>
+                                  <div className="creative-company">{exp.company}</div>
+                                  <p className="exp-body">{exp.description}</p>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
                     </div>
 
                     <div className="creative-sidebar">
-                      <div className="creative-section-card">
-                        <h3 className="creative-heading" style={{ color: styleConfig.accentColor }}>SKILLS & TOOLS</h3>
-                        <div className="creative-skills-grid">
-                          {resumeData.skills.map((s, i) => (
-                            <span key={i} className="creative-skill-pill" style={{ borderColor: styleConfig.accentColor }}>
-                              {s}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="creative-section-card">
-                        <h3 className="creative-heading" style={{ color: styleConfig.accentColor }}>EDUCATION</h3>
-                        {resumeData.educations.map((edu) => (
-                          <div key={edu.id} className="creative-edu-item">
-                            <strong>{edu.degree}</strong>
-                            <div className="edu-school">{edu.institution} • {edu.year}</div>
-                          </div>
-                        ))}
-                      </div>
+                      {sectionOrder.map((key) => {
+                        if (key === 'skills' && resumeData.skills?.length > 0) {
+                          return (
+                            <div key="skills" className="creative-section-card">
+                              <h3 className="creative-heading" style={{ color: styleConfig.accentColor }}>SKILLS & TOOLS</h3>
+                              <div className="creative-skills-grid">
+                                {resumeData.skills.map((s, i) => (
+                                  <span key={i} className="creative-skill-pill" style={{ borderColor: styleConfig.accentColor }}>
+                                    {s}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        if (key === 'education' && resumeData.educations?.length > 0) {
+                          return (
+                            <div key="education" className="creative-section-card">
+                              <h3 className="creative-heading" style={{ color: styleConfig.accentColor }}>EDUCATION</h3>
+                              {resumeData.educations.map((edu) => (
+                                <div key={edu.id} className="creative-edu-item">
+                                  <strong>{edu.degree}</strong>
+                                  <div className="edu-school">{edu.institution} • {edu.year}</div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
                     </div>
                   </div>
                 </div>
@@ -946,23 +1192,25 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
                       </ul>
                     </div>
 
-                    {/* Skills Block */}
-                    <div className="paper-section-block">
-                      <h3 className="section-title-icon" style={{ color: styleConfig.accentColor }}>
-                        <span className="icon-dot" style={{ backgroundColor: styleConfig.accentColor }} />
-                        SKILLS
-                      </h3>
-                      <ul className="skills-list">
-                        {resumeData.skills.map((s, i) => (
-                          <li key={i} style={{ borderBottomColor: styleConfig.accentColor }}>
-                            {s}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    {/* Skills Block (if skills is ordered to left sidebar) */}
+                    {resumeData.skills?.length > 0 && (
+                      <div className="paper-section-block">
+                        <h3 className="section-title-icon" style={{ color: styleConfig.accentColor }}>
+                          <span className="icon-dot" style={{ backgroundColor: styleConfig.accentColor }} />
+                          SKILLS
+                        </h3>
+                        <ul className="skills-list">
+                          {resumeData.skills.map((s, i) => (
+                            <li key={i} style={{ borderBottomColor: styleConfig.accentColor }}>
+                              {s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Right Column on Paper */}
+                  {/* Right Column on Paper - Dynamic Section Order */}
                   <div className="paper-col-right">
                     {/* Header Banner */}
                     <div className="paper-top-banner">
@@ -994,47 +1242,57 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
                       <div className="header-divider" style={{ backgroundColor: styleConfig.accentColor }} />
                     </div>
 
-                    {/* Profile Summary */}
-                    <div className="paper-section-block">
-                      <h3 className="section-title-icon" style={{ color: styleConfig.accentColor }}>
-                        <span className="icon-dot" style={{ backgroundColor: styleConfig.accentColor }} />
-                        PROFILE
-                      </h3>
-                      <p className="summary-paragraph">{resumeData.summary}</p>
-                    </div>
-
-                    {/* Work Experience */}
-                    <div className="paper-section-block">
-                      <h3 className="section-title-icon" style={{ color: styleConfig.accentColor }}>
-                        <span className="icon-dot" style={{ backgroundColor: styleConfig.accentColor }} />
-                        WORK EXPERIENCE
-                      </h3>
-                      {resumeData.experiences.map((exp) => (
-                        <div key={exp.id} className="exp-block">
-                          <div className="exp-header">
-                            <strong className="exp-company-name">{exp.company}</strong>
-                            <span className="exp-date">{exp.period}</span>
+                    {/* Dynamically Rendered Reorderable Main Sections */}
+                    {sectionOrder.map((sectionKey) => {
+                      if (sectionKey === 'summary' && resumeData.summary) {
+                        return (
+                          <div key="summary" className="paper-section-block">
+                            <h3 className="section-title-icon" style={{ color: styleConfig.accentColor }}>
+                              <span className="icon-dot" style={{ backgroundColor: styleConfig.accentColor }} />
+                              PROFILE
+                            </h3>
+                            <p className="summary-paragraph">{resumeData.summary}</p>
                           </div>
-                          <div className="exp-role-title">{exp.title}</div>
-                          <p className="exp-body">{exp.description}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Education */}
-                    <div className="paper-section-block">
-                      <h3 className="section-title-icon" style={{ color: styleConfig.accentColor }}>
-                        <span className="icon-dot" style={{ backgroundColor: styleConfig.accentColor }} />
-                        EDUCATION
-                      </h3>
-                      {resumeData.educations.map((edu) => (
-                        <div key={edu.id} className="edu-block">
-                          <strong className="edu-degree">{edu.degree}</strong>
-                          <div className="edu-school">{edu.institution} • {edu.year}</div>
-                        </div>
-                      ))}
-                    </div>
-
+                        );
+                      }
+                      if (sectionKey === 'employment' && resumeData.experiences?.length > 0) {
+                        return (
+                          <div key="employment" className="paper-section-block">
+                            <h3 className="section-title-icon" style={{ color: styleConfig.accentColor }}>
+                              <span className="icon-dot" style={{ backgroundColor: styleConfig.accentColor }} />
+                              WORK EXPERIENCE
+                            </h3>
+                            {resumeData.experiences.map((exp) => (
+                              <div key={exp.id} className="exp-block">
+                                <div className="exp-header">
+                                  <strong className="exp-company-name">{exp.company}</strong>
+                                  <span className="exp-date">{exp.period}</span>
+                                </div>
+                                <div className="exp-role-title">{exp.title}</div>
+                                <p className="exp-body">{exp.description}</p>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      if (sectionKey === 'education' && resumeData.educations?.length > 0) {
+                        return (
+                          <div key="education" className="paper-section-block">
+                            <h3 className="section-title-icon" style={{ color: styleConfig.accentColor }}>
+                              <span className="icon-dot" style={{ backgroundColor: styleConfig.accentColor }} />
+                              EDUCATION
+                            </h3>
+                            {resumeData.educations.map((edu) => (
+                              <div key={edu.id} className="edu-block">
+                                <strong className="edu-degree">{edu.degree}</strong>
+                                <div className="edu-school">{edu.institution} • {edu.year}</div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
                   </div>
 
                 </div>
@@ -1177,7 +1435,6 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
             </div>
           </div>
 
-          {/* Floating AI Helper Button */}
           <button className="floating-ai-widget-btn" title="Ask AI Co-pilot">
             <HiOutlineSparkles />
           </button>
@@ -1189,3 +1446,4 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
 };
 
 export default FullResumeEditor;
+

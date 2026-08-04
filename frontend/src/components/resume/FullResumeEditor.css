@@ -1231,13 +1231,114 @@ body.dark .full-resume-editor-viewport,
     border-radius: 0 !important;
     transform: scale(1) !important;
   }
-  .full-resume-editor-viewport,
-  .editor-top-navbar,
-  .editor-left-panel,
-  .editor-right-panel,
-  .canvas-notice,
-  .sidebar-rail,
-  .sidebar-trigger-btn {
-    display: none !important;
-  }
 }
+
+/* Drag & Drop Reorder Controls */
+.drag-handle-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: grab;
+  padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.drag-handle-btn:hover {
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.drag-handle-btn:active {
+  cursor: grabbing;
+}
+
+.reorder-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  margin-right: 6px;
+}
+
+.reorder-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+
+.reorder-btn:hover:not(:disabled) {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.reorder-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.accordion-item.is-dragging {
+  opacity: 0.5;
+  border: 2px dashed #2563eb !important;
+  background: #eff6ff !important;
+}
+
+.item-card.is-dragging {
+  opacity: 0.5;
+  border: 2px dashed #2563eb !important;
+  background: #eff6ff !important;
+}
+
+.section-reorder-banner {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(168, 85, 247, 0.06) 100%);
+  border: 1px dashed rgba(37, 99, 235, 0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: #1e293b;
+}
+
+.section-reorder-banner strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #2563eb;
+}
+
+.editor-skill-chip-draggable {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.editor-skill-chip-draggable:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
