@@ -306,6 +306,13 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
           </div>
 
           <div className="nav-actions">
+            <div className="streak-badge-pill" title="Daily Login Streak">
+              <span>🔥 5 Day Streak</span>
+            </div>
+
+            <button className="landing-back-btn" onClick={toggleTheme} title="Toggle Theme">
+              {isDarkMode ? <HiOutlineSun /> : <HiOutlineMoon />}
+            </button>
           </div>
         </header>
 
@@ -313,6 +320,45 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
         <main className="dashboard-body">
           {renderTabContent()}
         </main>
+      </div>
+
+      {/* Mobile Bottom Navigation Bar (< 768px) */}
+      <div className="mobile-bottom-nav">
+        <button
+          className={`mobile-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setActiveTab('dashboard')}
+        >
+          <HiOutlineSquares2X2 />
+          <span>Home</span>
+        </button>
+        <button
+          className={`mobile-nav-btn ${activeTab === 'create-resume' ? 'active' : ''}`}
+          onClick={() => setActiveTab('create-resume')}
+        >
+          <HiOutlineDocumentText />
+          <span>Resume</span>
+        </button>
+        <button
+          className={`mobile-nav-btn ${activeTab === 'job-tracker' ? 'active' : ''}`}
+          onClick={() => setActiveTab('job-tracker')}
+        >
+          <HiOutlineBriefcase />
+          <span>Kanban</span>
+        </button>
+        <button
+          className={`mobile-nav-btn ${activeTab === 'ats-checker' ? 'active' : ''}`}
+          onClick={() => setActiveTab('ats-checker')}
+        >
+          <HiOutlineShieldCheck />
+          <span>ATS</span>
+        </button>
+        <button
+          className={`mobile-nav-btn ${activeTab === 'profile' ? 'active' : ''}`}
+          onClick={() => setActiveTab('profile')}
+        >
+          <HiOutlineUser />
+          <span>Profile</span>
+        </button>
       </div>
     </div>
   );

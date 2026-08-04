@@ -78,7 +78,7 @@ button, input, textarea, select {
   font-family: inherit;
 }
 
-/* Animations */
+/* Animations & Shimmer Micro-Interactions */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -88,3 +88,57 @@ button, input, textarea, select {
   0%, 100% { box-shadow: 0 0 15px var(--primary-glow); }
   50% { box-shadow: 0 0 25px rgba(168, 85, 247, 0.35); }
 }
+
+@keyframes shimmerRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.shimmer-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-border::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(transparent, #00C6FF, #7B61FF, transparent 60%);
+  animation: shimmerRotate 4s linear infinite;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Active Button Click Spring Effect */
+button:active {
+  transform: scale(0.97) !important;
+  transition: transform 0.1s ease;
+}
+
+/* Page Break Indicator for A4 Paper */
+.a4-page-break-line {
+  width: 100%;
+  border-bottom: 2px dashed #00C6FF;
+  position: relative;
+  margin: 40px 0;
+  pointer-events: none;
+}
+
+.a4-page-break-line::after {
+  content: '✂️ PAGE BREAK (A4 Printable Limit)';
+  position: absolute;
+  right: 0;
+  top: -12px;
+  background: #00C6FF;
+  color: #050B1F;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+

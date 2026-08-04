@@ -483,6 +483,26 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
             <button className="zoom-btn" onClick={handleZoomIn} title="Zoom In">
               <HiOutlineMagnifyingGlassPlus />
             </button>
+            <div className="zoom-presets" style={{ display: 'flex', gap: '4px', marginLeft: '6px' }}>
+              {[50, 75, 100, 125].map((preset) => (
+                <button
+                  key={preset}
+                  className={`zoom-preset-btn ${zoomLevel === preset ? 'active' : ''}`}
+                  onClick={() => setZoomLevel(preset)}
+                  style={{
+                    fontSize: '11px',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    background: zoomLevel === preset ? '#2563eb' : '#ffffff',
+                    color: zoomLevel === preset ? '#ffffff' : '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {preset}%
+                </button>
+              ))}
+            </div>
           </div>
 
           <button className="navbar-icon-btn" title="Toggle Full Preview">
@@ -1299,6 +1319,9 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
               )}
 
             </div>
+
+            {/* Visual A4 Printable Page Break Guide Line */}
+            <div className="a4-page-break-line" />
           </div>
         </main>
 
