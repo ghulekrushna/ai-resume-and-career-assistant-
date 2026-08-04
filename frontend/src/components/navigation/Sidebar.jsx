@@ -267,9 +267,11 @@ const Sidebar = ({
               aria-label="Sign Out"
             >
               <HiOutlineArrowLeftOnRectangle />
+              {!isCollapsed && <span className="logout-label">Logout</span>}
             </button>
           </div>
         </div>
+
       </aside>
     </>
   );
