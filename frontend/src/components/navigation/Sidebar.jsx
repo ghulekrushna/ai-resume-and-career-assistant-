@@ -252,7 +252,7 @@ const Sidebar = ({
               <span className="online-indicator" />
             </div>
 
-            {!isCollapsed && (
+            {(!isCollapsed || mobileOpen) && (
               <div className="user-details">
                 <span className="user-name">{user.name}</span>
                 <span className="user-role">{user.role}</span>
@@ -267,10 +267,11 @@ const Sidebar = ({
               aria-label="Sign Out"
             >
               <HiOutlineArrowLeftOnRectangle />
-              {!isCollapsed && <span className="logout-label">Logout</span>}
+              {(!isCollapsed || mobileOpen) && <span className="logout-label">Logout</span>}
             </button>
           </div>
         </div>
+
 
       </aside>
     </>

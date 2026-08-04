@@ -611,11 +611,29 @@ body.light {
 @media (max-width: 1024px) {
   .sidebar-container {
     transform: translateX(-100%);
+    z-index: 10000;
   }
 
   .sidebar-container.mobile-open {
     transform: translateX(0);
-    width: 280px !important;
+    width: 285px !important;
+  }
+
+  .sidebar-container.mobile-open .logout-label {
+    display: inline-block !important;
+  }
+
+  .sidebar-container.mobile-open .logout-btn {
+    padding: 0.5rem 0.85rem;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+    border-radius: 10px;
+  }
+
+  .sidebar-container.mobile-open .logout-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
   }
 
   .sidebar-mobile-trigger-bar {
@@ -626,3 +644,4 @@ body.light {
     display: none;
   }
 }
+
