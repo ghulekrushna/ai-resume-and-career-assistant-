@@ -1542,9 +1542,19 @@ const FullResumeEditor = ({ template, onClose, onSave }) => {
         </aside>
 
       </div>
+
+      {/* ALWAYS-VISIBLE FIXED MOBILE DOWNLOAD FOOTER (<768px) */}
+      {isMobile && (
+        <div className="mobile-fixed-download-footer">
+          <button type="button" className="mobile-download-now-btn" onClick={handleDownload}>
+            <HiOutlineArrowDownTray /> Download Resume PDF
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 export default FullResumeEditor;
+
 

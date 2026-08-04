@@ -1506,5 +1506,52 @@ body.dark .full-resume-editor-viewport,
   max-width: 320px;
 }
 
+/* Always-Visible Fixed Bottom Mobile Download Footer Bar (<768px) */
+.mobile-fixed-download-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  z-index: 9999;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+}
+
+body.dark .mobile-fixed-download-footer {
+  background: #0f172a;
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-download-now-btn {
+  width: 100%;
+  max-width: 420px;
+  height: 46px;
+  background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+@media (max-width: 768px) {
+  .full-resume-editor-viewport {
+    padding-bottom: 64px;
+  }
+}
+
+
 
 
