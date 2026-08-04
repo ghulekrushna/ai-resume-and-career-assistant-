@@ -20,11 +20,18 @@ class ApiService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        const err = new Error(errorData.detail || `HTTP Error ${response.status}: ${response.statusText}`);
+        err.status = response.status;
+        err.detail = errorData.detail;
+        throw err;
       }
 
       return await response.json();
     } catch (error) {
+      if (error.status) {
+        throw error;
+      }
       console.warn(`[API Client Warning] Backend endpoint ${endpoint} unavailable. Using client fallback.`, error.message);
       return null;
     }

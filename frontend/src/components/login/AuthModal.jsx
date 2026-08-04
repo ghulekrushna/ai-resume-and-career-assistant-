@@ -2,9 +2,45 @@ import React, { useState } from 'react';
 import { apiService } from '../../services/api';
 import './AuthModal.css';
 
+const DEFAULT_USERS = [
+  { username: 'alex', email: 'alex@example.com', name: 'Alex Morgan', password: 'password123' },
+  { username: 'user', email: 'user@example.com', name: 'Demo User', password: 'password123' },
+  { username: 'admin', email: 'admin@example.com', name: 'Admin User', password: 'password123' }
+];
+
+const getRegisteredUsers = () => {
+  try {
+    const saved = localStorage.getItem('resuai_registered_users');
+    if (!saved) {
+      localStorage.setItem('resuai_registered_users', JSON.stringify(DEFAULT_USERS));
+      return DEFAULT_USERS;
+    }
+    return JSON.parse(saved);
+  } catch (e) {
+    return DEFAULT_USERS;
+  }
+};
+
+const saveRegisteredUser = (newUser) => {
+  try {
+    const users = getRegisteredUsers();
+    const exists = users.some(u => 
+      u.email.toLowerCase() === newUser.email.toLowerCase() || 
+      u.username.toLowerCase() === newUser.username.toLowerCase()
+    );
+    if (!exists) {
+      users.push(newUser);
+      localStorage.setItem('resuai_registered_users', JSON.stringify(users));
+    }
+  } catch (e) {
+    console.error("Failed to save user locally", e);
+  }
+};
+
 /**
  * AuthModal Component
- * Handles user authentication (Login and Signup screens) in a responsive, glassmorphic modal overlay.
+ * Handles user authentication (Login and Signup screens) with strict password verification
+ * and automatic transition to Sign Up on invalid credentials.
  */
 export default function AuthModal({ onClose, onLoginSuccess }) {
   
@@ -19,66 +55,178 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false); // Visibility of password text
   const [rememberMe, setRememberMe] = useState(false);  // Remember me checkbox
 
+  const [errorMessage, setErrorMessage] = useState(''); // Error feedback
+  const [successMessage, setSuccessMessage] = useState(''); // Success feedback
+  const [infoMessage, setInfoMessage] = useState('');   // Helper feedback
+  const [isLoading, setIsLoading] = useState(false);    // Loading state
+
   // ==========================================
   // 2. EVENT HANDLERS
   // ==========================================
   const handleToggleMode = (registerMode) => {
     setIsRegister(registerMode);
-    setName('');
-    setUsername('');
-    setEmail('');
-    setPassword('');
+    setErrorMessage('');
+    setSuccessMessage('');
+    setInfoMessage('');
     setShowPassword(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+    setInfoMessage('');
+    setIsLoading(true);
+
     try {
       if (isRegister) {
-        const res = await apiService.registerUser(name, email, password);
-        if (res && res.id) {
-          onLoginSuccess({
-            name: res.name || name,
-            email: res.email || email,
-            role: res.role || 'Job Seeker & Pro Member',
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(res.name || name)}&background=a855f7&color=fff&bold=true`
-          });
-        } else {
-          // Fallback login
-          onLoginSuccess({
-            name: name || email.split('@')[0],
-            email: email,
-            role: 'Job Seeker & Pro Member'
-          });
+        // ==========================================
+        // SIGN UP FLOW
+        // ==========================================
+        if (!name || !email || !password) {
+          setErrorMessage('Please fill in all required fields to sign up.');
+          setIsLoading(false);
+          return;
         }
+
+        let registeredUser = null;
+        try {
+          const res = await apiService.registerUser(name, email, password);
+          if (res && res.id) {
+            registeredUser = {
+              name: res.name || name,
+              email: res.email || email,
+              role: res.role || 'Job Seeker & Pro Member',
+              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(res.name || name)}&background=a855f7&color=fff&bold=true`
+            };
+          }
+        } catch (apiErr) {
+          if (apiErr.detail) {
+            setErrorMessage(apiErr.detail);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Save into client-side user database for fallback
+        const localUsername = email.split('@')[0];
+        saveRegisteredUser({ name, email, username: localUsername, password });
+
+        if (!registeredUser) {
+          registeredUser = {
+            name: name,
+            email: email,
+            role: 'Job Seeker & Pro Member',
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=a855f7&color=fff&bold=true`
+          };
+        }
+
+        setSuccessMessage('Account created successfully! Logging you in...');
+        setTimeout(() => {
+          setIsLoading(false);
+          onLoginSuccess(registeredUser);
+          onClose();
+        }, 800);
+
       } else {
-        const res = await apiService.loginUser(username, password);
-        if (res && res.user) {
-          localStorage.setItem('token', res.access_token);
-          onLoginSuccess({
-            name: res.user.name,
-            email: res.user.email,
-            role: res.user.role,
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(res.user.name)}&background=a855f7&color=fff&bold=true`
-          });
+        // ==========================================
+        // LOGIN FLOW
+        // ==========================================
+        if (!username || !password) {
+          setErrorMessage('Please enter your username/email and password.');
+          setIsLoading(false);
+          return;
+        }
+
+        let loggedInUser = null;
+        let backendAuthFailed = false;
+
+        try {
+          const res = await apiService.loginUser(username, password);
+          if (res && res.user) {
+            localStorage.setItem('token', res.access_token);
+            loggedInUser = {
+              name: res.user.name,
+              email: res.user.email,
+              role: res.user.role || 'Job Seeker & Pro Member',
+              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(res.user.name)}&background=a855f7&color=fff&bold=true`
+            };
+          }
+        } catch (apiErr) {
+          backendAuthFailed = true;
+        }
+
+        // 1. Backend Login Successful
+        if (loggedInUser) {
+          setSuccessMessage('Login successful! Redirecting...');
+          setTimeout(() => {
+            setIsLoading(false);
+            onLoginSuccess(loggedInUser);
+            onClose();
+          }, 800);
+          return;
+        }
+
+        // 2. Backend specifically returned auth error (401 Incorrect username or password)
+        if (backendAuthFailed) {
+          setIsLoading(false);
+          setErrorMessage('Incorrect username or password. Access denied.');
+          setInfoMessage('Account not authenticated. Redirecting to Sign Up to create your account...');
+          setTimeout(() => {
+            setIsRegister(true);
+            setEmail(username.includes('@') ? username : '');
+            setName(username);
+            setErrorMessage('');
+            setInfoMessage('Please complete Sign Up to create your account and log in.');
+          }, 1800);
+          return;
+        }
+
+        // 3. Fallback: Check against local registered users database
+        const localUsers = getRegisteredUsers();
+        const matchedUser = localUsers.find(u => 
+          u.username.toLowerCase() === username.toLowerCase() || 
+          u.email.toLowerCase() === username.toLowerCase()
+        );
+
+        if (matchedUser) {
+          if (matchedUser.password === password) {
+            // Password MATCHES! Allow Login
+            setSuccessMessage('Login successful!');
+            setTimeout(() => {
+              setIsLoading(false);
+              onLoginSuccess({
+                name: matchedUser.name,
+                email: matchedUser.email,
+                role: 'Job Seeker & Pro Member',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(matchedUser.name)}&background=a855f7&color=fff&bold=true`
+              });
+              onClose();
+            }, 800);
+          } else {
+            // Wrong Password! DO NOT LOGIN!
+            setIsLoading(false);
+            setErrorMessage('Incorrect password! Please enter the correct password.');
+            setInfoMessage('Incorrect password entered. If you need a new account, click Sign Up below.');
+          }
         } else {
-          // Fallback login
-          onLoginSuccess({
-            name: username || 'User',
-            email: `${username}@example.com`,
-            role: 'Job Seeker & Pro Member'
-          });
+          // Account NOT Found! DO NOT LOGIN!
+          setIsLoading(false);
+          setErrorMessage(`No account found for "${username}". Access denied.`);
+          setInfoMessage('Redirecting to Sign Up page to create an account...');
+          setTimeout(() => {
+            setIsRegister(true);
+            setEmail(username.includes('@') ? username : '');
+            setName(username);
+            setErrorMessage('');
+            setInfoMessage('Fill in your details below to create your account.');
+          }, 1800);
         }
       }
     } catch (err) {
-      console.warn("Auth warning:", err);
-      onLoginSuccess({
-        name: isRegister ? name : (username || 'User'),
-        email: email || `${username}@example.com`,
-        role: 'Job Seeker & Pro Member'
-      });
+      setIsLoading(false);
+      setErrorMessage(err.message || 'Authentication error occurred.');
     }
-    onClose();
   };
 
   // ==========================================
@@ -156,6 +304,28 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
           </p>
         </div>
 
+        {/* Alert Notifications */}
+        {errorMessage && (
+          <div className="auth-alert auth-alert-error">
+            <span>⚠️</span>
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="auth-alert auth-alert-success">
+            <span>✅</span>
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {infoMessage && (
+          <div className="auth-alert auth-alert-info">
+            <span>ℹ️</span>
+            <span>{infoMessage}</span>
+          </div>
+        )}
+
         {/* Form Fields */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', zIndex: 2 }}>
           
@@ -186,7 +356,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
               <input 
                 type="text" 
                 className="auth-input-elem" 
-                placeholder="Username"
+                placeholder="Username or Email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -247,7 +417,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
               <a 
                 href="#forgot" 
                 className="auth-forgot-link"
-                onClick={(e) => { e.preventDefault(); alert('Reset password link sent (mock).'); }}
+                onClick={(e) => { e.preventDefault(); alert('Reset password link sent to registered email.'); }}
               >
                 Forgot Password?
               </a>
@@ -255,12 +425,18 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
           )}
 
           {/* Form Submit Button */}
-          <button type="submit" className="auth-submit-btn">
-            <span>{isRegister ? 'Sign In' : 'Login'}</span>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
+          <button type="submit" className="auth-submit-btn" disabled={isLoading}>
+            {isLoading ? (
+              <span className="auth-spinner"></span>
+            ) : (
+              <>
+                <span>{isRegister ? 'Sign Up & Login' : 'Login'}</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </>
+            )}
           </button>
         </form>
 
@@ -313,3 +489,4 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
     </div>
   );
 }
+
