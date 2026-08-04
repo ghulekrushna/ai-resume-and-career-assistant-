@@ -360,11 +360,18 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
           <span>Home</span>
         </button>
         <button
-          className={`mobile-nav-btn ${activeTab === 'create-resume' ? 'active' : ''}`}
+          className={`mobile-nav-btn ${activeTab === 'create-resume' || activeTab === 'my-resume' ? 'active' : ''}`}
           onClick={() => setActiveTab('create-resume')}
         >
           <HiOutlineDocumentText />
           <span>Resume</span>
+        </button>
+        <button
+          className={`mobile-nav-btn ${activeTab === 'ai-resume' ? 'active' : ''}`}
+          onClick={() => setActiveTab('ai-resume')}
+        >
+          <HiOutlineSparkles />
+          <span>AI Bot</span>
         </button>
         <button
           className={`mobile-nav-btn ${activeTab === 'job-tracker' ? 'active' : ''}`}
@@ -388,6 +395,7 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
           <span>Profile</span>
         </button>
       </div>
+
     </div>
   );
 };
