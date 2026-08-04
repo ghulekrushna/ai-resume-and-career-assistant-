@@ -611,6 +611,28 @@ body.light .mobile-nav-btn.active {
   font-size: 19px;
 }
 
+.mobile-nav-btn.logout-btn-mobile {
+  color: #ef4444 !important;
+}
+
+.mobile-nav-btn.logout-btn-mobile:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.mobile-top-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.mobile-top-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+}
+
+
 
 @media (max-width: 1024px) {
   .dashboard-main-wrapper {

@@ -23,8 +23,10 @@ import {
   HiOutlinePlus,
   HiOutlineArrowUpRight,
   HiOutlineCheck,
-  HiOutlineViewColumns
+  HiOutlineViewColumns,
+  HiOutlineArrowLeftOnRectangle
 } from 'react-icons/hi2';
+
 
 import './DashboardLayout.css';
 
@@ -343,6 +345,10 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
             <button className="landing-back-btn" onClick={toggleTheme} title="Toggle Theme">
               {isDarkMode ? <HiOutlineSun /> : <HiOutlineMoon />}
             </button>
+
+            <button className="landing-back-btn mobile-top-logout-btn" onClick={onLogout || onBackToLanding} title="Sign Out">
+              <HiOutlineArrowLeftOnRectangle /> Sign Out
+            </button>
           </div>
         </header>
 
@@ -403,7 +409,16 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
           <HiOutlineChatBubbleLeftRight />
           <span>Interview Prep</span>
         </button>
+        <button
+          className="mobile-nav-btn logout-btn-mobile"
+          onClick={onLogout || onBackToLanding}
+          title="Sign Out"
+        >
+          <HiOutlineArrowLeftOnRectangle />
+          <span>Logout</span>
+        </button>
       </div>
+
 
 
     </div>
