@@ -241,17 +241,17 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
                 <div className="job-list">
                   <div className="job-item">
                     <div className="job-meta">
-                      <h4>Staff Software Engineer - AI</h4>
-                      <p>OpenAI • San Francisco, CA (Remote) • $210k - $280k</p>
+                      <h4>Senior AI & Full Stack Engineer</h4>
+                      <p>Razorpay • Bengaluru, Karnataka • ₹32L - ₹45L/yr</p>
                     </div>
                     <span className="match-pill">98% Match</span>
                   </div>
                   <div className="job-item">
                     <div className="job-meta">
                       <h4>Lead Full Stack Architect</h4>
-                      <p>Vercel • Remote • $190k - $240k</p>
+                      <p>Flipkart • Bengaluru, Karnataka • ₹42L - ₹58L/yr</p>
                     </div>
-                    <span className="match-pill">94% Match</span>
+                    <span className="match-pill">95% Match</span>
                   </div>
                 </div>
               </div>
@@ -274,7 +274,13 @@ const DashboardLayout = ({ initialTab = 'dashboard', user, onLogout, onBackToLan
         return <AtsChecker onGainXp={gainXp} />;
 
       case 'job-recommendation':
-        return <JobRecommendations onGainXp={gainXp} />;
+        return (
+          <JobRecommendations
+            onGainXp={gainXp}
+            user={user}
+            onNavigateToTracker={() => setActiveTab('job-tracker')}
+          />
+        );
 
       case 'interview-prep':
         return <InterviewPrep onGainXp={gainXp} />;

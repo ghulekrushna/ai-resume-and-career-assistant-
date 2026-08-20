@@ -20,58 +20,58 @@ import './KanbanTracker.css';
 const DEFAULT_JOBS = [
   {
     id: 'job-1',
-    title: 'Senior Full Stack Engineer',
-    company: 'Google',
-    location: 'Mountain View, CA (Hybrid)',
-    salary: '$185,000 - $210,000',
+    title: 'Senior AI & Full Stack Engineer',
+    company: 'Razorpay',
+    location: 'Bengaluru, Karnataka (Hybrid)',
+    salary: '₹32L - ₹45L/yr',
     status: 'offered',
-    atsScore: 96,
+    atsScore: 98,
     appliedDate: '2026-07-20',
-    notes: 'Offer letter received! Finalizing equity package negotiation with recruiter.'
+    notes: 'Offer letter received! Finalizing CTC and joining bonus with talent team.'
   },
   {
     id: 'job-2',
-    title: 'AI Systems Engineer',
-    company: 'OpenAI',
-    location: 'San Francisco, CA (Remote)',
-    salary: '$190,000 - $220,000',
+    title: 'Lead Full Stack Architect',
+    company: 'Flipkart',
+    location: 'Bengaluru, Karnataka (Remote)',
+    salary: '₹42L - ₹58L/yr',
     status: 'interviewing',
-    atsScore: 94,
+    atsScore: 95,
     appliedDate: '2026-07-25',
-    notes: 'Technical STAR System Architecture interview scheduled for Thursday.'
+    notes: 'Technical System Architecture round scheduled for Thursday.'
   },
   {
     id: 'job-3',
-    title: 'Lead Frontend Architect',
-    company: 'Stripe',
-    location: 'Remote',
-    salary: '$175,000 - $195,000',
+    title: 'Principal AI & Cloud Solutions Architect',
+    company: 'TCS (Tata Consultancy Services)',
+    location: 'Hyderabad / Pune',
+    salary: '₹28L - ₹38L/yr',
     status: 'applied',
-    atsScore: 91,
+    atsScore: 92,
     appliedDate: '2026-07-28',
-    notes: 'Submitted customized ATS Resume tailored to React & TypeScript systems.'
+    notes: 'Submitted customized ATS Resume tailored to Cloud & GenAI workflows.'
   },
   {
     id: 'job-4',
-    title: 'Product Engineer',
-    company: 'Vercel',
-    location: 'Remote',
-    salary: '$165,000 - $185,000',
+    title: 'Senior Software Engineer - Platform',
+    company: 'Swiggy',
+    location: 'Bengaluru, Karnataka',
+    salary: '₹30L - ₹44L/yr',
     status: 'wishlist',
-    atsScore: 89,
+    atsScore: 91,
     appliedDate: '2026-08-01',
-    notes: 'Saved posting. Need to polish bullet points for Next.js infrastructure.'
+    notes: 'Saved posting. Need to polish bullet points for distributed systems.'
   },
   {
     id: 'job-5',
-    title: 'Backend Python Engineer',
-    company: 'Netflix',
-    location: 'Los Gatos, CA',
-    salary: '$180,000 - $200,000',
+    title: 'Staff Frontend Architect',
+    company: 'Zoho Corporation',
+    location: 'Chennai, Tamil Nadu',
+    salary: '₹26L - ₹36L/yr',
     status: 'applied',
-    atsScore: 88,
+    atsScore: 89,
     appliedDate: '2026-08-02',
-    notes: 'Applied via company portal with cover letter.'
+    notes: 'Applied via company careers portal with cover letter.'
   }
 ];
 
@@ -459,7 +459,7 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
                 <input
                   type="text"
                   className="kanban-form-input"
-                  placeholder="e.g. Google, Stripe"
+                  placeholder="e.g. Razorpay, Flipkart, TCS"
                   value={formData.company}
                   onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                   required
@@ -472,7 +472,7 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
                   <input
                     type="text"
                     className="kanban-form-input"
-                    placeholder="e.g. Remote / NYC"
+                    placeholder="e.g. Bengaluru, Remote - India"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   />
@@ -483,7 +483,7 @@ export default function KanbanTracker({ gainXp, onNavigateToAts }) {
                   <input
                     type="text"
                     className="kanban-form-input"
-                    placeholder="e.g. $160,000/yr"
+                    placeholder="e.g. ₹32L - ₹45L/yr"
                     value={formData.salary}
                     onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
                   />
