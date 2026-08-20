@@ -13,6 +13,7 @@ import AuthModal from '../components/login/AuthModal'
 import CardNav from '../components/navigation/CardNav'
 import TrueFocus from '../components/focus/TrueFocus'
 import LaserFlow from '../components/LaserFlow/LaserFlow'
+import DepthCarousel from '../components/carousel/DepthCarousel'
 
 import resumeMockup from '../assets/resume_builder_mockup.png'
 import templateModernProfessional from '../assets/template_modern_professional.png'
@@ -25,14 +26,14 @@ import resumeDataScientist from '../assets/resume_data_scientist.png'
 import resumeProductManager from '../assets/resume_product_manager.png'
 
 const templates = [
-  { name: "Software Engineer", src: resumeSoftwareEngineer },
-  { name: "Full Stack Developer", src: resumeFullStackDeveloper },
-  { name: "Data Scientist / AI", src: resumeDataScientist },
-  { name: "Product Manager", src: resumeProductManager },
-  { name: "Modern Professional", src: templateModernProfessional },
-  { name: "ATS Friendly Standard", src: templateAtsFriendly },
-  { name: "Creative & Branding", src: templateCreative },
-  { name: "Premium Executive", src: templateExecutive }
+  { name: "Software Engineer", image: resumeSoftwareEngineer, alt: "Software Engineer Resume Template" },
+  { name: "Full Stack Developer", image: resumeFullStackDeveloper, alt: "Full Stack Developer Resume Template" },
+  { name: "Data Scientist / AI", image: resumeDataScientist, alt: "Data Scientist / AI Resume Template" },
+  { name: "Product Manager", image: resumeProductManager, alt: "Product Manager Resume Template" },
+  { name: "Modern Professional", image: templateModernProfessional, alt: "Modern Professional Resume Template" },
+  { name: "ATS Friendly Standard", image: templateAtsFriendly, alt: "ATS Friendly Standard Resume Template" },
+  { name: "Creative & Branding", image: templateCreative, alt: "Creative & Branding Resume Template" },
+  { name: "Premium Executive", image: templateExecutive, alt: "Premium Executive Resume Template" }
 ]
 
 const statsData = [
@@ -539,7 +540,7 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
         </motion.div>
       </section>
 
-      {/* Resume Templates Section */}
+      {/* Resume Templates Section with 3D DepthCarousel */}
       <section id="resume-templates" className="resume-templates-section">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
@@ -556,27 +557,37 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         >
-          Choose from our library of recruiter-approved, 100% ATS-compliant templates designed to help you stand out.
+          Explore recruiter-approved, 100% ATS-compliant 3D interactive templates designed to help you stand out.
         </motion.p>
-        <div className="templates-grid">
-          {templates.map((tpl, i) => (
-            <motion.div
-              key={i}
-              className="template-preview-card"
-              onClick={() => setShowAuthModal(true)}
-              initial={{ opacity: 0, y: 35 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.15 }}
-              transition={{ duration: 0.5, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={{ y: -8, scale: 1.03 }}
-            >
-              <div className="template-svg-wrapper">
-                <img src={tpl.src} alt={tpl.name} />
-              </div>
-              <span className="template-name">{tpl.name}</span>
-            </motion.div>
-          ))}
-        </div>
+        
+        <motion.div
+          className="depth-carousel-wrapper"
+          initial={{ opacity: 0, scale: 0.95, y: 35 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <DepthCarousel
+            items={templates}
+            cardWidth={300}
+            cardHeight={410}
+            radius={18}
+            depth={220}
+            spread={90}
+            tilt={22}
+            tiltDirection="right"
+            perspective={1400}
+            visibleCards={4}
+            falloff={0.2}
+            blur={6}
+            autoplay
+            autoplayDelay={3200}
+            loop
+            showControls
+            showIndicators
+            onItemSelect={() => setShowAuthModal(true)}
+          />
+        </motion.div>
       </section>
 
       {/* 4d. Authentication Overlay Modal Dialog */}
