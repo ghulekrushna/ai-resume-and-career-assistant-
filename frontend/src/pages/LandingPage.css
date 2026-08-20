@@ -100,18 +100,33 @@
 
 /* Hero Section */
 .landing-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: 40px;
   align-items: center;
   min-height: 100vh;
-  padding: 100px 0 60px 0;
+  padding: 100px 24px 60px 24px;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   box-sizing: border-box;
 }
 
+.landing-hero-laserflow-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 24px;
+  opacity: 0.85;
+}
+
 .landing-hero-left {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -975,4 +990,154 @@ body.light .template-name {
 .reveal-section.reveal-active .reveal-delay-2 { transition-delay: 0.3s; }
 .reveal-section.reveal-active .reveal-delay-3 { transition-delay: 0.45s; }
 .reveal-section.reveal-active .reveal-delay-4 { transition-delay: 0.6s; }
+
+/* Interactive LaserFlow Showcase Section */
+.laser-flow-showcase-section {
+  min-height: 100vh;
+  padding: 80px 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.laser-showcase-title {
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  background: linear-gradient(135deg, #fff 60%, #9ca3af 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
+body.light .laser-showcase-title {
+  background: linear-gradient(135deg, #111827 60%, #4b5563 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.laser-showcase-subtitle {
+  text-align: center;
+  margin: 0 auto 36px auto;
+  max-width: 620px;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.laser-flow-box-container {
+  width: 100%;
+  max-width: 1000px;
+  height: 520px;
+  position: relative;
+  overflow: hidden;
+  background-color: #120F17;
+  border-radius: 24px;
+  border: 1.5px solid rgba(255, 121, 198, 0.35);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 121, 198, 0.15);
+  cursor: crosshair;
+}
+
+.laser-flow-card-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 84%;
+  max-width: 680px;
+  height: 60%;
+  background-color: rgba(18, 15, 23, 0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 2px solid #FF79C6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 6;
+  padding: 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.laser-flow-card-inner {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.laser-flow-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #FF79C6;
+  background: rgba(255, 121, 198, 0.12);
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 121, 198, 0.3);
+}
+
+.laser-flow-card-inner h3 {
+  font-family: var(--font-heading);
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.laser-flow-card-inner p {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 480px;
+  margin: 0;
+}
+
+.laser-flow-reveal-image {
+  position: absolute;
+  width: 100%;
+  height: 200%;
+  top: -50%;
+  left: 0;
+  z-index: 5;
+  mix-blend-mode: lighten;
+  opacity: 0.45;
+  pointer-events: none;
+  object-fit: cover;
+  --mx: -9999px;
+  --my: -9999px;
+  -webkit-mask-image: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,1) 0px, rgba(255,255,255,0.95) 60px, rgba(255,255,255,0.6) 120px, rgba(255,255,255,0.25) 180px, rgba(255,255,255,0) 240px);
+  mask-image: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,1) 0px, rgba(255,255,255,0.95) 60px, rgba(255,255,255,0.6) 120px, rgba(255,255,255,0.25) 180px, rgba(255,255,255,0) 240px);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+@media (max-width: 900px) {
+  .laser-flow-showcase-section {
+    min-height: auto;
+    padding: 50px 0;
+  }
+  .laser-showcase-title {
+    font-size: 30px;
+  }
+  .laser-flow-box-container {
+    height: 400px;
+  }
+  .laser-flow-card-inner h3 {
+    font-size: 20px;
+  }
+  .laser-flow-card-inner p {
+    font-size: 13px;
+  }
+}
+
 

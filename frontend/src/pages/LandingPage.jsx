@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './LandingPage.css'
 import AuthModal from '../components/login/AuthModal'
 import CardNav from '../components/navigation/CardNav'
 import TrueFocus from '../components/focus/TrueFocus'
+import LaserFlow from '../components/LaserFlow/LaserFlow'
 
 import resumeMockup from '../assets/resume_builder_mockup.png'
 import templateModernProfessional from '../assets/template_modern_professional.png'
@@ -37,6 +38,26 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
   // ==========================================
   const [showAuthModal, setShowAuthModal] = useState(false) // Visibility of login/signup modal
   const theme = 'dark'                                       // Application theme locked to 'dark'
+  const revealImgRef = useRef(null)
+
+  const handleLaserMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const el = revealImgRef.current;
+    if (el) {
+      el.style.setProperty('--mx', `${x}px`);
+      el.style.setProperty('--my', `${y + rect.height * 0.5}px`);
+    }
+  };
+
+  const handleLaserMouseLeave = () => {
+    const el = revealImgRef.current;
+    if (el) {
+      el.style.setProperty('--mx', '-9999px');
+      el.style.setProperty('--my', '-9999px');
+    }
+  };
 
   // Scroll Reveal Intersection Observer
   useEffect(() => {
@@ -122,6 +143,16 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
 
       {/* 4b. Hero Showcase Section */}
       <section className="landing-hero reveal-section animate-fade">
+        <div className="landing-hero-laserflow-bg">
+          <LaserFlow
+            horizontalBeamOffset={0.1}
+            verticalBeamOffset={0.0}
+            color="#8b5cf6"
+            fogIntensity={0.45}
+            wispDensity={1.2}
+            flowSpeed={0.35}
+          />
+        </div>
         <div className="landing-hero-left reveal-item">
           <div className="landing-pill">
             AI feeling unfamiliar? Start with the fundamentals &rarr;
@@ -211,6 +242,45 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
           <div className="step-icon">🏆</div>
           <h3>Show the world</h3>
           <p>Share your badge, optimise your CV, and apply to roles that fit your growth.</p>
+        </div>
+      </section>
+
+      {/* 4d. Interactive LaserFlow Reveal Showcase */}
+      <section className="laser-flow-showcase-section reveal-section animate-fade">
+        <h2 className="reveal-item laser-showcase-title">
+          Interactive AI Career Scanner
+        </h2>
+        <p className="section-subtitle reveal-item reveal-delay-1 laser-showcase-subtitle">
+          Hover over the interactive canvas below to reveal how our AI scans your experience against real-world job requirements.
+        </p>
+        <div 
+          className="laser-flow-box-container reveal-item reveal-delay-2"
+          onMouseMove={handleLaserMouseMove}
+          onMouseLeave={handleLaserMouseLeave}
+        >
+          <LaserFlow
+            horizontalBeamOffset={0.1}
+            verticalBeamOffset={0.0}
+            color="#FF79C6"
+          />
+          
+          <div className="laser-flow-card-overlay">
+            <div className="laser-flow-card-inner">
+              <span className="laser-flow-badge">✧ AI LASER SCANNER</span>
+              <h3>Real-time Skill &amp; ATS Reveal</h3>
+              <p>Move your cursor across the container to trigger the laser reveal effect on our AI dashboard preview.</p>
+              <button className="btn-primary" onClick={() => setShowAuthModal(true)} style={{ marginTop: '12px' }}>
+                Try AI Scanner Now
+              </button>
+            </div>
+          </div>
+
+          <img
+            ref={revealImgRef}
+            src={resumeMockup}
+            alt="Reveal effect"
+            className="laser-flow-reveal-image"
+          />
         </div>
       </section>
 
