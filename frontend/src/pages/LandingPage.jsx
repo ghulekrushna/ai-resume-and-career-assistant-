@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { HiOutlineArrowUp } from 'react-icons/hi2'
 import './LandingPage.css'
 import AuthModal from '../components/login/AuthModal'
 import CardNav from '../components/navigation/CardNav'
@@ -29,15 +30,17 @@ const templates = [
 /**
  * LandingPage Component
  * The main public-facing landing page of ResuAI Coach. Features product showcase, pricing links,
- * and handles starting user authentication.
+ * fluid smooth scrolling, scroll reading progress bar, and user authentication.
  */
 export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
   
   // ==========================================
   // 1. STATE INITIALIZATION & CONFIGURATION
   // ==========================================
-  const [showAuthModal, setShowAuthModal] = useState(false) // Visibility of login/signup modal
-  const theme = 'dark'                                       // Application theme locked to 'dark'
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  const theme = 'dark'
   const revealImgRef = useRef(null)
 
   const handleLaserMouseMove = (e) => {
@@ -59,7 +62,40 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
     }
   };
 
-  // Scroll Reveal Intersection Observer
+  // Smooth Section Scroll Helpers
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Scroll Progress & Floating Back-To-Top listener
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const currentScroll = window.scrollY;
+          const progress = totalHeight > 0 ? (currentScroll / totalHeight) * 100 : 0;
+          setScrollProgress(progress);
+          setShowScrollTop(currentScroll > 320);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll Reveal Intersection Observer with natural threshold and margin
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -69,7 +105,10 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
           }
         });
       },
-      { threshold: 0.15 }
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -40px 0px'
+      }
     );
 
     const sections = document.querySelectorAll('.reveal-section');
@@ -79,8 +118,6 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
       sections.forEach((sec) => observer.unobserve(sec));
     };
   }, []);
-
-
 
   // ==========================================
   // 4. PUBLIC LANDING PAGE LAYOUT RENDER
@@ -94,23 +131,24 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
 
   const navItems = [
     {
-      label: "Individuals",
+      label: "Features",
       bgColor: theme === 'dark' ? '#1B1722' : '#f3f4f6',
       textColor: theme === 'dark' ? '#fff' : '#1f2937',
       links: [
-        { label: "Resume Optimizer", ariaLabel: "Resume Optimizer", onClick: () => setShowAuthModal(true) },
-        { label: "Mock Interview", ariaLabel: "Mock Interview Prep", onClick: () => setShowAuthModal(true) },
-        { label: "Cover Letter Maker", ariaLabel: "Cover Letter Maker", onClick: () => setShowAuthModal(true) },
-        { label: "Career Roadmap", ariaLabel: "Career Roadmap", onClick: () => setShowAuthModal(true) }
+        { label: "ATS Resume Builder", ariaLabel: "ATS Resume Builder", onClick: () => scrollToSection('resume-builder') },
+        { label: "AI Laser Scanner", ariaLabel: "AI Laser Scanner", onClick: () => scrollToSection('laser-scanner') },
+        { label: "Career Assessment", ariaLabel: "Career Assessment", onClick: () => scrollToSection('how-it-works') },
+        { label: "Resume Templates", ariaLabel: "Resume Templates", onClick: () => scrollToSection('resume-templates') }
       ]
     },
     {
-      label: "Organizations",
+      label: "Tools & Prep",
       bgColor: theme === 'dark' ? '#2F293A' : '#e5e7eb',
       textColor: theme === 'dark' ? '#fff' : '#1f2937',
       links: [
-        { label: "Candidate Screening", ariaLabel: "Candidate Screening", onClick: () => setShowAuthModal(true) },
-        { label: "Custom Interviewer", ariaLabel: "Custom Interviewer", onClick: () => setShowAuthModal(true) }
+        { label: "Mock Interview Prep", ariaLabel: "Mock Interview Prep", onClick: () => setShowAuthModal(true) },
+        { label: "AI Job Recommendations", ariaLabel: "AI Job Recommendations", onClick: () => setShowAuthModal(true) },
+        { label: "Kanban Job Tracker", ariaLabel: "Kanban Job Tracker", onClick: () => setShowAuthModal(true) }
       ]
     },
     {
@@ -118,14 +156,30 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
       bgColor: theme === 'dark' ? '#3e354f' : '#d1d5db',
       textColor: theme === 'dark' ? '#fff' : '#1f2937',
       links: [
-        { label: "Pricing", ariaLabel: "Pricing", onClick: () => setShowAuthModal(true) },
-        { label: "Our Story", ariaLabel: "Our Story", onClick: () => setShowAuthModal(true) }
+        { label: "Templates Library", ariaLabel: "Templates Library", onClick: () => scrollToSection('resume-templates') },
+        { label: "Start Free Evaluation", ariaLabel: "Start Free Evaluation", onClick: () => setShowAuthModal(true) }
       ]
     }
   ];
 
   return (
     <div className="landing-container">
+      {/* Top Scroll Reading Progress Bar */}
+      <div className="landing-scroll-progress-container">
+        <div className="landing-scroll-progress-bar" style={{ width: `${scrollProgress}%` }} />
+      </div>
+
+      {/* Floating Back to Top Button */}
+      <button
+        type="button"
+        className={`back-to-top-btn ${showScrollTop ? 'visible' : ''}`}
+        onClick={scrollToTop}
+        aria-label="Back to top"
+        title="Scroll to top"
+      >
+        <HiOutlineArrowUp />
+      </button>
+
       {/* Spacer for absolute positioned CardNav */}
       <div className="landing-navbar-spacer" style={{ height: '120px' }}></div>
       
@@ -142,7 +196,7 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
       />
 
       {/* 4b. Hero Showcase Section */}
-      <section className="landing-hero reveal-section animate-fade">
+      <section id="hero" className="landing-hero reveal-section animate-fade">
         <div className="landing-hero-laserflow-bg">
           <LaserFlow
             horizontalBeamOffset={0.1}
@@ -169,8 +223,8 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
             <button className="btn-primary landing-cta-btn" onClick={() => setShowAuthModal(true)}>
               Get Your Free AI Readiness Score
             </button>
-            <a href="#auth" className="landing-link-text" onClick={(e) => { e.preventDefault(); setShowAuthModal(true); }}>
-              What does this check measure?
+            <a href="#how-it-works" className="landing-link-text" onClick={(e) => { e.preventDefault(); scrollToSection('how-it-works'); }}>
+              What does this check measure? &darr;
             </a>
           </div>
         </div>
@@ -224,7 +278,7 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
       </section>
 
       {/* 4c. Feature Steps / Process Section */}
-      <section className="landing-steps reveal-section animate-fade">
+      <section id="how-it-works" className="landing-steps reveal-section animate-fade">
         <div className="section-divider reveal-item"></div>
         <div className="step-card reveal-item">
           <div className="step-icon">📋</div>
@@ -246,7 +300,7 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
       </section>
 
       {/* 4d. Interactive LaserFlow Reveal Showcase */}
-      <section className="laser-flow-showcase-section reveal-section animate-fade">
+      <section id="laser-scanner" className="laser-flow-showcase-section reveal-section animate-fade">
         <h2 className="reveal-item laser-showcase-title">
           Interactive AI Career Scanner
         </h2>
@@ -285,7 +339,7 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
       </section>
 
       {/* New AI Resume Showcase Section */}
-      <section className="landing-features-resume reveal-section animate-fade">
+      <section id="resume-builder" className="landing-features-resume reveal-section animate-fade">
         <div className="resume-features-left reveal-item">
           <TrueFocus 
             sentence="Build Resume with our Web"
@@ -331,7 +385,7 @@ export default function LandingPage({ onLoginSuccess, onGoToDashboard }) {
       </section>
 
       {/* Resume Templates Section */}
-      <section className="resume-templates-section reveal-section animate-fade">
+      <section id="resume-templates" className="resume-templates-section reveal-section animate-fade">
         <h2 className="reveal-item">Expert-Crafted Resume Templates</h2>
         <p className="section-subtitle reveal-item reveal-delay-1">
           Choose from our library of recruiter-approved, 100% ATS-compliant templates designed to help you stand out.

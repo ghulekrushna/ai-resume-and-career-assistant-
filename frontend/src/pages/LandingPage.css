@@ -1,4 +1,66 @@
 /* Landing Page Main Layout */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+/* Top Scroll Reading Progress Bar */
+.landing-scroll-progress-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.landing-scroll-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #f43f5e 0%, #a855f7 50%, #06b6d4 100%);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.8), 0 0 20px rgba(6, 182, 212, 0.6);
+  transition: width 0.08s ease-out;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Floating Back to Top Button */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.9), rgba(244, 63, 94, 0.9));
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px) scale(0.85);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+}
+
+.back-to-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.back-to-top-btn:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 30px rgba(168, 85, 247, 0.7);
+  background: linear-gradient(135deg, #a855f7, #f43f5e);
+}
+
 .landing-container {
   width: 100%;
   max-width: 1240px;
@@ -107,11 +169,10 @@
   grid-template-columns: 1.15fr 0.85fr;
   gap: 40px;
   align-items: center;
-  min-height: 100vh;
-  padding: 100px 24px 60px 24px;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  min-height: calc(100vh - 140px);
+  padding: 60px 24px 80px 24px;
   box-sizing: border-box;
+  scroll-margin-top: 100px;
 }
 
 .landing-hero-laserflow-bg {
@@ -367,13 +428,12 @@
   display: grid;
   grid-template-columns: 1fr 40px 1fr 40px 1fr;
   align-items: center;
-  min-height: 100vh;
-  padding: 100px 0;
+  min-height: auto;
+  padding: 80px 0;
   gap: 20px;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
   box-sizing: border-box;
   align-content: center;
+  scroll-margin-top: 100px;
 }
 
 /* Glowing section divider line */
@@ -631,14 +691,13 @@ body.light .dropdown-link:hover {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 60px;
-  min-height: 100vh;
-  padding: 100px 0;
+  min-height: auto;
+  padding: 80px 0;
   align-items: center;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
   box-sizing: border-box;
   align-content: center;
   margin: 0;
+  scroll-margin-top: 100px;
 }
 
 .resume-features-left {
@@ -794,16 +853,15 @@ body.light .resume-feature-info h3 {
 
 /* Resume Templates Section */
 .resume-templates-section {
-  min-height: 100vh;
-  padding: 100px 0;
+  min-height: auto;
+  padding: 80px 0 120px 0;
   margin: 0;
   text-align: center;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  scroll-margin-top: 100px;
 }
 
 .resume-templates-section h2 {
@@ -962,23 +1020,13 @@ body.light .template-name {
   }
 }
 
-/* Viewport scroll snapping settings (Desktop only) */
-@media (min-width: 1025px) {
-  html {
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
-  }
-  body {
-    scroll-snap-type: y mandatory;
-  }
-}
-
 /* Reveal transition styles */
 .reveal-section .reveal-item {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s cubic-bezier(0.215, 0.61, 0.355, 1),
-              transform 0.8s cubic-bezier(0.215, 0.61, 0.355, 1);
+  transform: translateY(28px);
+  will-change: opacity, transform;
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal-section.reveal-active .reveal-item {
@@ -986,22 +1034,21 @@ body.light .template-name {
   transform: translateY(0);
 }
 
-.reveal-section.reveal-active .reveal-delay-1 { transition-delay: 0.15s; }
-.reveal-section.reveal-active .reveal-delay-2 { transition-delay: 0.3s; }
-.reveal-section.reveal-active .reveal-delay-3 { transition-delay: 0.45s; }
-.reveal-section.reveal-active .reveal-delay-4 { transition-delay: 0.6s; }
+.reveal-section.reveal-active .reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-section.reveal-active .reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-section.reveal-active .reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-section.reveal-active .reveal-delay-4 { transition-delay: 0.4s; }
 
 /* Interactive LaserFlow Showcase Section */
 .laser-flow-showcase-section {
-  min-height: 100vh;
+  min-height: auto;
   padding: 80px 0;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
+  scroll-margin-top: 100px;
 }
 
 .laser-showcase-title {
